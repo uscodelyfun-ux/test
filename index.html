@@ -14,800 +14,640 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
         .modal.active { display: flex; }
-        .pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
+        .pulse { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        .tab-btn { background:#f3f4f6; color:#4b5563; transition:all 0.15s; cursor:pointer; }
+        .tab-btn:hover { background:#e5e7eb; }
+        .tab-btn.active { background:#2563eb !important; color:white !important; }
+        pre { white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Landing Page (same as before) -->
-    <div id="landingPage">
-        <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+
+<!-- Landing Page -->
+<div id="landingPage">
+    <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span class="font-bold text-xl">Phone Backend</span>
+            </div>
+            <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Get Started</button>
+        </div>
+    </header>
+    <section class="container mx-auto px-4 py-20 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">Turn Your Old Phone Into a Backend Server</h1>
+        <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">A free, beginner-friendly platform. All data stays on YOUR phone.</p>
+        <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 text-lg font-medium">Start Building Free</button>
+    </section>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboardPage" class="hidden">
+    <!-- Sign In -->
+    <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        <div class="max-w-md w-full mx-4">
+            <div class="bg-white p-8 rounded-lg shadow-lg border text-center">
+                <svg class="h-16 w-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <h1 class="text-2xl font-bold mb-2">Welcome to Phone Backend</h1>
+                <p class="text-gray-600 mb-6">Sign in with Google to get started</p>
+                <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium">Sign in with Google</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainDashboard" class="hidden min-h-screen bg-gray-50">
+        <header class="bg-white border-b">
             <div class="container mx-auto px-4 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
                     <span class="font-bold text-xl">Phone Backend</span>
                 </div>
-                <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    Get Started
-                </button>
-            </div>
-        </header>
-
-        <section class="container mx-auto px-4 py-20 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">
-                Turn Your Old Phone Into a Backend Server
-            </h1>
-            <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                A free, beginner-friendly platform. All data stays on YOUR phone.
-            </p>
-            <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 text-lg font-medium">
-                Start Building Free
-            </button>
-        </section>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboardPage" class="hidden">
-        <!-- Sign In Screen -->
-        <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
-            <div class="max-w-md w-full mx-4">
-                <div class="bg-white p-8 rounded-lg shadow-lg border text-center">
-                    <svg class="h-16 w-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
-                    <h1 class="text-2xl font-bold mb-2">Welcome to Phone Backend</h1>
-                    <p class="text-gray-600 mb-6">Sign in with Google to get started</p>
-                    <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium">
-                        Sign in with Google
+                <div class="flex items-center gap-4">
+                    <img id="userPhoto" src="" alt="User" class="w-8 h-8 rounded-full">
+                    <span id="userName" class="text-sm font-medium hidden md:block"></span>
+                    <button onclick="signOut()" class="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span class="hidden md:inline">Sign Out</span>
                     </button>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Main Dashboard -->
-        <div id="mainDashboard" class="hidden min-h-screen bg-gray-50">
-            <header class="bg-white border-b">
-                <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg mb-8">
+                <h1 class="text-3xl font-bold mb-2">Welcome, <span id="userFirstName"></span>! 👋</h1>
+                <p class="text-blue-100">Your Phone Backend Platform is ready to use.</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <span class="text-gray-600">APIs</span>
+                    <p class="text-3xl font-bold"><span id="apiCount">0</span> / 2</p>
+                    <p class="text-sm text-gray-500">APIs created</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <span class="text-gray-600">Phones</span>
+                    <p class="text-3xl font-bold"><span id="phoneCount">0</span></p>
+                    <p class="text-sm text-gray-500">Connected devices</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <span class="text-gray-600">Requests</span>
+                    <p class="text-3xl font-bold">0</p>
+                    <p class="text-sm text-gray-500">API requests today</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <span class="text-gray-600">Status</span>
+                    <p class="text-3xl font-bold text-red-600" id="overallStatus">Offline</p>
+                    <p class="text-sm text-gray-500">System status</p>
+                </div>
+            </div>
+
+            <!-- Phones -->
+            <div class="bg-white p-8 rounded-lg shadow-sm border mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold">Connected Phones</h2>
+                    <button onclick="showConnectPhoneModal()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        <span class="font-bold text-xl">Phone Backend</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <img id="userPhoto" src="" alt="User" class="w-8 h-8 rounded-full">
-                        <span id="userName" class="text-sm font-medium hidden md:block"></span>
-                        <button onclick="signOut()" class="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                            <span class="hidden md:inline">Sign Out</span>
-                        </button>
+                        Connect Phone
+                    </button>
+                </div>
+                <div id="phoneList" class="space-y-4">
+                    <div class="text-center py-12 text-gray-500">
+                        <p class="text-lg font-medium">No phones connected yet</p>
+                        <p class="text-sm">Click "Connect Phone" to get started</p>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            <div class="container mx-auto px-4 py-8">
-                <!-- Welcome Banner -->
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg mb-8">
-                    <h1 class="text-3xl font-bold mb-2">Welcome, <span id="userFirstName"></span>! 👋</h1>
-                    <p class="text-blue-100">Your Phone Backend Platform is ready to use.</p>
+            <!-- APIs -->
+            <div class="bg-white p-8 rounded-lg shadow-sm border mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold">My APIs</h2>
+                    <button onclick="showCreateAPIModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">+ Create API</button>
                 </div>
-
-                <!-- Stats -->
-                <div class="grid md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">APIs</span>
-                        </div>
-                        <p class="text-3xl font-bold"><span id="apiCount">0</span> / 2</p>
-                        <p class="text-sm text-gray-500">APIs created</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Phones</span>
-                        </div>
-                        <p class="text-3xl font-bold"><span id="phoneCount">0</span></p>
-                        <p class="text-sm text-gray-500">Connected devices</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Requests</span>
-                        </div>
-                        <p class="text-3xl font-bold">0</p>
-                        <p class="text-sm text-gray-500">API requests today</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Status</span>
-                        </div>
-                        <p class="text-3xl font-bold" id="overallStatus">Offline</p>
-                        <p class="text-sm text-gray-500">System status</p>
-                    </div>
-                </div>
-
-                <!-- Connected Phones Section -->
-                <div class="bg-white p-8 rounded-lg shadow-sm border mb-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold">Connected Phones</h2>
-                        <button onclick="showConnectPhoneModal()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Connect Phone
-                        </button>
-                    </div>
-                    <div id="phoneList" class="space-y-4">
-                        <div class="text-center py-12 text-gray-500">
-                            <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                            <p class="text-lg font-medium">No phones connected yet</p>
-                            <p class="text-sm">Click "Connect Phone" to get started</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- My APIs Section -->
-                <div class="bg-white p-8 rounded-lg shadow-sm border mb-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold">My APIs</h2>
-                        <button onclick="showCreateAPIModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                            + Create API
-                        </button>
-                    </div>
-                    <div id="apiList" class="space-y-4">
-                        <p class="text-gray-500 text-center py-8">No APIs yet. Create your first API to get started!</p>
-                    </div>
+                <div id="apiList" class="space-y-4">
+                    <p class="text-gray-500 text-center py-8">No APIs yet. Create your first API to get started!</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Connect Phone Modal -->
-    <div id="connectPhoneModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold">Connect Your Phone</h2>
-                <button onclick="closeConnectPhoneModal()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+<!-- Connect Phone Modal -->
+<div id="connectPhoneModal" class="modal">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold">Connect Your Phone</h2>
+            <button onclick="closeConnectPhoneModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="text-center">
+                <h3 class="font-bold mb-4">📱 Scan with Your Phone</h3>
+                <div id="phoneQRCode" class="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg"></div>
+                <p class="text-sm text-gray-600 mt-4">Scan this QR code with your phone's camera</p>
             </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- QR Code -->
-                <div class="text-center">
-                    <h3 class="font-bold mb-4">📱 Scan with Your Phone</h3>
-                    <div id="phoneQRCode" class="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg"></div>
-                    <p class="text-sm text-gray-600 mt-4">Scan this QR code with your phone's camera</p>
+            <div>
+                <h3 class="font-bold mb-4">💻 Or Type This in Termux:</h3>
+                <div class="space-y-3">
+                    <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-400">Step 1: Install</span>
+                            <button onclick="copyToClipboard('pkg update && pkg install nodejs wget -y')" class="text-xs bg-blue-600 px-2 py-1 rounded text-white">Copy</button>
+                        </div>
+                        pkg update && pkg install nodejs wget -y
+                    </div>
+                    <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-400">Step 2: Download</span>
+                            <button onclick="copyToClipboard(getDownloadCommand())" class="text-xs bg-blue-600 px-2 py-1 rounded text-white">Copy</button>
+                        </div>
+                        <span id="downloadCommand"></span>
+                    </div>
+                    <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-gray-400">Step 3: Connect</span>
+                            <button onclick="copyToClipboard('node connect.js ' + getCurrentUsername())" class="text-xs bg-blue-600 px-2 py-1 rounded text-white">Copy</button>
+                        </div>
+                        node connect.js <span id="usernameCommand"></span>
+                    </div>
                 </div>
-
-                <!-- OR Manual Instructions -->
-                <div>
-                    <h3 class="font-bold mb-4">💻 Or Type This in Termux:</h3>
-                    <div class="space-y-3">
-                        <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs text-gray-400">Step 1: Install</span>
-                                <button onclick="copyToClipboard('pkg update && pkg install nodejs wget -y')" class="text-xs bg-blue-600 px-2 py-1 rounded">Copy</button>
-                            </div>
-                            pkg update && pkg install nodejs wget -y
-                        </div>
-                        <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs text-gray-400">Step 2: Download</span>
-                                <button onclick="copyToClipboard(getDownloadCommand())" class="text-xs bg-blue-600 px-2 py-1 rounded">Copy</button>
-                            </div>
-                            <span id="downloadCommand"></span>
-                        </div>
-                        <div class="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs text-gray-400">Step 3: Connect</span>
-                                <button onclick="copyToClipboard('node connect.js ' + getCurrentUsername())" class="text-xs bg-blue-600 px-2 py-1 rounded">Copy</button>
-                            </div>
-                            node connect.js <span id="usernameCommand"></span>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-blue-800">
-                            <strong>✨ That's it!</strong> Your phone will appear in the list above once connected.
-                        </p>
-                    </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800"><strong>✨ That's it!</strong> Your phone will appear in the list above once connected.</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Create API Modal (same as before) -->
-    <div id="createAPIModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold">Create New API</h2>
-                <button onclick="closeCreateAPIModal()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+<!-- Create API Modal -->
+<div id="createAPIModal" class="modal">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold">Create New API</h2>
+            <button onclick="closeCreateAPIModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">API Name</label>
+                <input type="text" id="apiName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="My Todo API">
             </div>
-            <form onsubmit="createAPI(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">API Name</label>
-                    <input type="text" id="apiName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="My Todo API">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <textarea id="apiDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="A simple todo list API"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Security</label>
-                    <select id="apiSecurity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="public">Public (No authentication)</option>
-                        <option value="auth">Authenticated (Google sign-in required)</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeCreateAPIModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Create API</button>
-                </div>
-            </form>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea id="apiDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="A simple todo list API"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Security</label>
+                <select id="apiSecurity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="public">Public (No authentication)</option>
+                    <option value="auth">Authenticated (Google sign-in required)</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button onclick="closeCreateAPIModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                <button onclick="createAPI()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Create API</button>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+<!-- API Details Modal -->
+<div id="apiDetailsModal" class="modal">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height:90vh;">
+        <div class="flex items-center justify-between p-6 border-b shrink-0">
+            <div class="flex items-center gap-3 flex-wrap">
+                <h2 class="text-xl font-bold" id="detailApiName">API Details</h2>
+                <span id="detailApiBadge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+            </div>
+            <button onclick="closeAPIDetailsModal()" class="text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+        </div>
+        <p class="px-6 pt-3 pb-1 text-sm text-gray-500" id="detailApiDesc"></p>
+        <div id="detailApiBody" class="overflow-y-auto p-6 flex-1"></div>
+    </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
-            authDomain: "harshitproto.firebaseapp.com",
-            projectId: "harshitproto",
-            storageBucket: "harshitproto.firebasestorage.app",
-            messagingSenderId: "805078252087",
-            appId: "1:805078252087:web:1ca3704d0e672906445db2"
-        };
+<!-- Firebase SDK (module scope - only Firebase stuff here) -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+    import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
+        authDomain: "harshitproto.firebaseapp.com",
+        projectId: "harshitproto",
+        storageBucket: "harshitproto.firebasestorage.app",
+        messagingSenderId: "805078252087",
+        appId: "1:805078252087:web:1ca3704d0e672906445db2"
+    };
 
-        let currentUser = null;
-        let phonesListener = null;
-        const apiDataStore = {};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        window.signInWithGoogle = async function() {
-            try {
-                const provider = new GoogleAuthProvider();
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to sign in: ' + error.message);
-            }
-        };
+    let currentUser = null;
+    let phonesListener = null;
 
-        window.signOut = async function() {
-            try {
-                await firebaseSignOut(auth);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
+    // Expose to global scope
+    window._db = db;
+    window._auth = auth;
 
-        window.createAPI = async function(event) {
-            event.preventDefault();
-            const name = document.getElementById('apiName').value;
-            const description = document.getElementById('apiDescription').value;
-            const security = document.getElementById('apiSecurity').value;
-
-            try {
-                await addDoc(collection(db, 'apis'), {
-                    name,
-                    description,
-                    security,
-                    userId: currentUser.email,
-                    username: currentUser.email.split('@')[0],
-                    createdAt: serverTimestamp()
-                });
-                
-                closeCreateAPIModal();
-                loadAPIs();
-                alert('API created successfully!');
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to create API');
-            }
-        };
-
-        async function loadAPIs() {
-            if (!currentUser) return;
-            try {
-                const q = query(collection(db, 'apis'), where('userId', '==', currentUser.email));
-                const snapshot = await getDocs(q);
-                const apiList = document.getElementById('apiList');
-                const apiCount = document.getElementById('apiCount');
-
-                if (snapshot.empty) {
-                    apiList.innerHTML = '<p class="text-gray-500 text-center py-8">No APIs yet. Create your first API!</p>';
-                    apiCount.textContent = '0';
-                } else {
-                    apiCount.textContent = snapshot.size;
-                    apiList.innerHTML = '';
-                    snapshot.forEach(docSnap => {
-                        const api = docSnap.data();
-                        const apiId = docSnap.id;
-                        apiDataStore[apiId] = api;
-                        const username = api.username || currentUser.email.split('@')[0];
-                        const baseUrl = `http://<your-phone-ip>:8080`;
-                        const endpointPath = `/${api.name.toLowerCase().replace(/\s+/g, '-')}`;
-                        const fullUrl = `${baseUrl}${endpointPath}`;
-
-                        const el = document.createElement('div');
-                        el.className = 'border rounded-xl p-5 hover:shadow-md transition-shadow';
-                        el.innerHTML = `
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-3 mb-1 flex-wrap">
-                                        <h3 class="font-bold text-lg">${api.name}</h3>
-                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${api.security === 'public' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
-                                            ${api.security === 'public' ? '🔓 Public' : '🔒 Auth Required'}
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-gray-500 mb-3">${api.description || 'No description'}</p>
-
-                                    <!-- Endpoint URL bar -->
-                                    <div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-3 py-2 text-sm font-mono overflow-x-auto">
-                                        <span class="text-yellow-400 text-xs font-bold shrink-0">GET/POST</span>
-                                        <span class="truncate" id="url-${apiId}">${fullUrl}</span>
-                                        <button onclick="copyUrl('${apiId}')" class="ml-auto shrink-0 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">
-                                            Copy
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col gap-2 shrink-0">
-                                    <button onclick="showAPIDetails('${apiId}')" 
-                                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg font-medium">
-                                        📖 How to Use
-                                    </button>
-                                    <button onclick="deleteAPI('${apiId}')" class="border border-red-200 text-red-500 hover:bg-red-50 text-sm px-3 py-2 rounded-lg">
-                                        🗑 Delete
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        apiList.appendChild(el);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading APIs:', error);
-            }
+    window.signInWithGoogle = async function() {
+        try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+        } catch (e) {
+            console.error(e);
+            alert('Sign in failed: ' + e.message);
         }
+    };
 
-        function startListeningToPhones() {
-            if (!currentUser) return;
-            
-            const q = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
-            phonesListener = onSnapshot(q, (snapshot) => {
-                const phoneList = document.getElementById('phoneList');
-                const phoneCount = document.getElementById('phoneCount');
-                const overallStatus = document.getElementById('overallStatus');
+    window.signOut = async function() {
+        try { await fbSignOut(auth); } catch(e) { console.error(e); }
+    };
 
-                if (snapshot.empty) {
-                    phoneList.innerHTML = `
-                        <div class="text-center py-12 text-gray-500">
-                            <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                            <p class="text-lg font-medium">No phones connected yet</p>
-                            <p class="text-sm">Click "Connect Phone" to get started</p>
-                        </div>
-                    `;
-                    phoneCount.textContent = '0';
-                    overallStatus.textContent = 'Offline';
-                    overallStatus.className = 'text-3xl font-bold text-red-600';
-                } else {
-                    phoneCount.textContent = snapshot.size;
-                    overallStatus.textContent = 'Online';
-                    overallStatus.className = 'text-3xl font-bold text-green-600';
-                    
-                    phoneList.innerHTML = '';
-                    snapshot.forEach(docSnap => {
-                        const phone = docSnap.data();
-                        const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
-                        
-                        const el = document.createElement('div');
-                        el.className = 'border rounded-lg p-4 ' + (isOnline ? 'border-green-200 bg-green-50' : 'border-gray-200');
-                        el.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-lg">${phone.deviceName || 'Android Phone'}</h3>
-                                        <p class="text-sm text-gray-600">${phone.model || 'Unknown Model'}</p>
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <span class="flex items-center gap-1">
-                                                <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'} ${isOnline ? 'pulse' : ''}"></span>
-                                                <span class="text-sm ${isOnline ? 'text-green-600' : 'text-gray-500'}">${isOnline ? 'Online' : 'Offline'}</span>
-                                            </span>
-                                            ${phone.ip ? `<span class="text-xs text-gray-500">• ${phone.ip}</span>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xs text-gray-500">Connected</p>
-                                    <p class="text-sm font-medium">${phone.connectedAt ? new Date(phone.connectedAt.toMillis()).toLocaleString() : 'Recently'}</p>
-                                </div>
-                            </div>
-                        `;
-                        phoneList.appendChild(el);
-                    });
-                }
+    window.createAPI = async function() {
+        const name = document.getElementById('apiName').value.trim();
+        if (!name) { alert('Please enter an API name'); return; }
+        const description = document.getElementById('apiDescription').value.trim();
+        const security = document.getElementById('apiSecurity').value;
+        try {
+            await addDoc(collection(db, 'apis'), {
+                name,
+                description,
+                security,
+                userId: currentUser.email,
+                username: currentUser.email.split('@')[0],
+                createdAt: serverTimestamp()
             });
+            closeCreateAPIModal();
+            loadAPIs();
+        } catch (e) {
+            console.error(e);
+            alert('Failed to create API: ' + e.message);
         }
+    };
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                showMainDashboard(user);
-                loadAPIs();
-                startListeningToPhones();
+    window.deleteAPI = async function(id) {
+        if (!confirm('Delete this API?')) return;
+        try {
+            await deleteDoc(doc(db, 'apis', id));
+            loadAPIs();
+        } catch (e) {
+            console.error(e);
+            alert('Failed to delete API');
+        }
+    };
+
+    async function loadAPIs() {
+        if (!currentUser) return;
+        try {
+            const q = query(collection(db, 'apis'), where('userId', '==', currentUser.email));
+            const snapshot = await getDocs(q);
+            const apiList = document.getElementById('apiList');
+            document.getElementById('apiCount').textContent = snapshot.size;
+
+            if (snapshot.empty) {
+                apiList.innerHTML = '<p class="text-gray-500 text-center py-8">No APIs yet. Create your first API!</p>';
+                return;
+            }
+
+            apiList.innerHTML = '';
+            snapshot.forEach(docSnap => {
+                const api = docSnap.data();
+                const apiId = docSnap.id;
+
+                // Store in global map for the modal to access
+                window._apiStore = window._apiStore || {};
+                window._apiStore[apiId] = api;
+
+                const slug = (api.name || 'api').toLowerCase().replace(/\s+/g, '-');
+                const previewUrl = 'http://YOUR-PHONE-IP:8080/' + slug;
+                const isPublic = api.security === 'public';
+
+                const card = document.createElement('div');
+                card.className = 'border rounded-xl p-5 hover:shadow-md transition-shadow bg-white';
+
+                card.innerHTML =
+                    '<div class="flex items-start justify-between gap-4">' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<div class="flex items-center gap-3 mb-1 flex-wrap">' +
+                                '<h3 class="font-bold text-lg">' + escHtml(api.name) + '</h3>' +
+                                '<span class="px-2 py-0.5 rounded-full text-xs font-semibold ' + (isPublic ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700') + '">' +
+                                    (isPublic ? '🔓 Public' : '🔒 Auth Required') +
+                                '</span>' +
+                            '</div>' +
+                            '<p class="text-sm text-gray-500 mb-3">' + escHtml(api.description || 'No description') + '</p>' +
+                            '<div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-3 py-2 text-xs font-mono">' +
+                                '<span class="text-yellow-400 font-bold shrink-0">GET/POST</span>' +
+                                '<span class="truncate flex-1" id="urlbar-' + apiId + '">' + previewUrl + '</span>' +
+                                '<button onclick="copyUrlBar(\'' + apiId + '\')" class="ml-1 shrink-0 bg-gray-700 hover:bg-gray-600 text-white px-2 py-0.5 rounded text-xs">Copy</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex flex-col gap-2 shrink-0">' +
+                            '<button onclick="openAPIDetails(\'' + apiId + '\')" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg font-medium whitespace-nowrap">📖 How to Use</button>' +
+                            '<button onclick="deleteAPI(\'' + apiId + '\')" class="border border-red-200 text-red-500 hover:bg-red-50 text-sm px-3 py-2 rounded-lg">🗑 Delete</button>' +
+                        '</div>' +
+                    '</div>';
+
+                apiList.appendChild(card);
+            });
+        } catch (e) {
+            console.error('Error loading APIs:', e);
+        }
+    }
+
+    function startListeningToPhones() {
+        if (!currentUser) return;
+        const q = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
+        phonesListener = onSnapshot(q, (snapshot) => {
+            const phoneList = document.getElementById('phoneList');
+            const phoneCount = document.getElementById('phoneCount');
+            const overallStatus = document.getElementById('overallStatus');
+
+            if (snapshot.empty) {
+                phoneList.innerHTML = '<div class="text-center py-12 text-gray-500"><p class="text-lg font-medium">No phones connected yet</p><p class="text-sm">Click "Connect Phone" to get started</p></div>';
+                phoneCount.textContent = '0';
+                overallStatus.textContent = 'Offline';
+                overallStatus.className = 'text-3xl font-bold text-red-600';
             } else {
-                currentUser = null;
-                if (phonesListener) phonesListener();
-                showSignIn();
+                phoneCount.textContent = snapshot.size;
+                overallStatus.textContent = 'Online';
+                overallStatus.className = 'text-3xl font-bold text-green-600';
+                phoneList.innerHTML = '';
+                snapshot.forEach(docSnap => {
+                    const phone = docSnap.data();
+                    const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
+                    const el = document.createElement('div');
+                    el.className = 'border rounded-lg p-4 ' + (isOnline ? 'border-green-200 bg-green-50' : 'border-gray-200');
+                    el.innerHTML =
+                        '<div class="flex items-center justify-between">' +
+                            '<div class="flex items-center gap-4">' +
+                                '<div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">📱</div>' +
+                                '<div>' +
+                                    '<h3 class="font-bold text-lg">' + escHtml(phone.deviceName || 'Android Phone') + '</h3>' +
+                                    '<p class="text-sm text-gray-600">' + escHtml(phone.model || 'Unknown') + '</p>' +
+                                    '<div class="flex items-center gap-2 mt-1">' +
+                                        '<span class="w-2 h-2 rounded-full inline-block ' + (isOnline ? 'bg-green-500 pulse' : 'bg-gray-400') + '"></span>' +
+                                        '<span class="text-sm ' + (isOnline ? 'text-green-600' : 'text-gray-500') + '">' + (isOnline ? 'Online' : 'Offline') + '</span>' +
+                                        (phone.ip ? '<span class="text-xs text-gray-500">• ' + phone.ip + '</span>' : '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="text-right">' +
+                                '<p class="text-xs text-gray-500">Phone IP</p>' +
+                                '<p class="text-sm font-mono font-bold text-blue-700">' + (phone.ip || 'Unknown') + '</p>' +
+                            '</div>' +
+                        '</div>';
+                    phoneList.appendChild(el);
+                });
             }
         });
+    }
 
-        function showSignIn() {
-            document.getElementById('signInScreen').classList.remove('hidden');
-            document.getElementById('mainDashboard').classList.add('hidden');
-        }
-
-        function showMainDashboard(user) {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
             document.getElementById('signInScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
             document.getElementById('userName').textContent = user.displayName || 'User';
             document.getElementById('userFirstName').textContent = (user.displayName || 'Developer').split(' ')[0];
-            document.getElementById('userPhoto').src = user.photoURL || 'https://via.placeholder.com/32';
+            document.getElementById('userPhoto').src = user.photoURL || '';
+            loadAPIs();
+            startListeningToPhones();
+        } else {
+            currentUser = null;
+            if (phonesListener) phonesListener();
+            document.getElementById('signInScreen').classList.remove('hidden');
+            document.getElementById('mainDashboard').classList.add('hidden');
         }
+    });
 
-        // Export for use in vanilla JS
-        window.getCurrentUsername = () => currentUser ? currentUser.email.split('@')[0] : 'username';
-    </script>
+    window.getCurrentUsername = () => currentUser ? currentUser.email.split('@')[0] : 'username';
+    window._loadAPIs = loadAPIs;
+</script>
 
-    <script>
-        function showDashboard() {
-            document.getElementById('landingPage').classList.add('hidden');
-            document.getElementById('dashboardPage').classList.remove('hidden');
+<!-- All UI logic in a regular script (NOT module) so onclick works everywhere -->
+<script>
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showDashboard() {
+        document.getElementById('landingPage').classList.add('hidden');
+        document.getElementById('dashboardPage').classList.remove('hidden');
+    }
+
+    function showConnectPhoneModal() {
+        document.getElementById('connectPhoneModal').classList.add('active');
+        const qrDiv = document.getElementById('phoneQRCode');
+        qrDiv.innerHTML = '';
+        const setupUrl = window.location.origin + '/connect.html?user=' + getCurrentUsername();
+        new QRCode(qrDiv, { text: setupUrl, width: 200, height: 200 });
+        document.getElementById('downloadCommand').textContent = 'wget ' + window.location.origin + '/connect.js';
+        document.getElementById('usernameCommand').textContent = getCurrentUsername();
+    }
+
+    function closeConnectPhoneModal() {
+        document.getElementById('connectPhoneModal').classList.remove('active');
+    }
+
+    function showCreateAPIModal() {
+        document.getElementById('createAPIModal').classList.add('active');
+    }
+
+    function closeCreateAPIModal() {
+        document.getElementById('createAPIModal').classList.remove('active');
+        document.getElementById('apiName').value = '';
+        document.getElementById('apiDescription').value = '';
+    }
+
+    function closeAPIDetailsModal() {
+        document.getElementById('apiDetailsModal').classList.remove('active');
+    }
+
+    function getDownloadCommand() {
+        return 'wget ' + window.location.origin + '/connect.js';
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => alert('✅ Copied!'));
+    }
+
+    function copyUrlBar(apiId) {
+        const el = document.getElementById('urlbar-' + apiId);
+        if (el) navigator.clipboard.writeText(el.textContent).then(() => alert('✅ URL Copied!'));
+    }
+
+    function openAPIDetails(apiId) {
+        const store = window._apiStore;
+        if (!store || !store[apiId]) {
+            alert('Could not load API data. Please refresh the page.');
+            return;
         }
+        const api = store[apiId];
+        const slug = (api.name || 'api').toLowerCase().replace(/\s+/g, '-');
+        const url = 'http://YOUR-PHONE-IP:8080/' + slug;
+        const isPublic = api.security === 'public';
 
-        function showConnectPhoneModal() {
-            const modal = document.getElementById('connectPhoneModal');
-            modal.classList.add('active');
-            
-            // Generate QR code
-            const qrDiv = document.getElementById('phoneQRCode');
-            qrDiv.innerHTML = '';
-            
-            const setupUrl = window.location.origin + '/connect.html?user=' + getCurrentUsername();
-            new QRCode(qrDiv, {
-                text: setupUrl,
-                width: 200,
-                height: 200
-            });
+        // Set header
+        document.getElementById('detailApiName').textContent = api.name;
+        document.getElementById('detailApiDesc').textContent = api.description || '';
+        const badge = document.getElementById('detailApiBadge');
+        badge.textContent = isPublic ? '🔓 Public' : '🔒 Auth Required';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-bold ' + (isPublic ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700');
 
-            // Update commands
-            document.getElementById('downloadCommand').textContent = 'wget ' + window.location.origin + '/connect.js';
-            document.getElementById('usernameCommand').textContent = getCurrentUsername();
-        }
+        // Build body using DOM (safe, no nested template literal issues)
+        const body = document.getElementById('detailApiBody');
+        body.innerHTML = '';
 
-        function closeConnectPhoneModal() {
-            document.getElementById('connectPhoneModal').classList.remove('active');
-        }
-
-        function showCreateAPIModal() {
-            document.getElementById('createAPIModal').classList.add('active');
-        }
-
-        function closeCreateAPIModal() {
-            document.getElementById('createAPIModal').classList.remove('active');
-            document.getElementById('apiName').value = '';
-            document.getElementById('apiDescription').value = '';
-        }
-
-        function getDownloadCommand() {
-            return 'wget ' + window.location.origin + '/connect.js';
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✅ Copied! Paste in Termux');
-            });
-        }
-
-        window.deleteAPI = async function(id) {
-            if (confirm('Delete this API?')) {
-                try {
-                    await deleteDoc(doc(getFirestore(), 'apis', id));
-                    loadAPIs();
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            }
+        // --- Section: URL ---
+        const urlSection = document.createElement('div');
+        urlSection.className = 'mb-6';
+        urlSection.innerHTML =
+            '<h3 class="font-bold text-gray-800 mb-2">🔗 Your API URL</h3>' +
+            '<p class="text-sm text-gray-500 mb-2">Replace <code class="bg-gray-100 px-1 rounded font-mono">YOUR-PHONE-IP</code> with the IP address shown in the Connected Phones section (e.g. <code class="bg-gray-100 px-1 rounded font-mono">192.168.1.5</code>).</p>' +
+            '<div class="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3 font-mono text-sm">' +
+                '<span class="text-green-400 flex-1 break-all" id="detail-url-display">' + url + '</span>' +
+                '<button id="detail-url-copy-btn" class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700 shrink-0">Copy</button>' +
+            '</div>';
+        body.appendChild(urlSection);
+        document.getElementById('detail-url-copy-btn').onclick = function() {
+            navigator.clipboard.writeText(document.getElementById('detail-url-display').textContent).then(() => alert('✅ Copied!'));
         };
 
-        window.copyUrl = function(apiId) {
-            const urlEl = document.getElementById('url-' + apiId);
-            if (urlEl) {
-                navigator.clipboard.writeText(urlEl.textContent.trim()).then(() => {
-                    alert('✅ URL Copied!');
-                });
-            }
-        };
+        // --- Section: Endpoints table ---
+        const tableSection = document.createElement('div');
+        tableSection.className = 'mb-6';
+        tableSection.innerHTML =
+            '<h3 class="font-bold text-gray-800 mb-3">📋 Available Endpoints</h3>' +
+            '<div class="border rounded-lg overflow-hidden text-sm">' +
+                '<table class="w-full">' +
+                    '<thead class="bg-gray-50 text-gray-600 text-xs uppercase">' +
+                        '<tr>' +
+                            '<th class="text-left px-4 py-3">Method</th>' +
+                            '<th class="text-left px-4 py-3">Path</th>' +
+                            '<th class="text-left px-4 py-3">Action</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody class="divide-y">' +
+                        makeRow('GET',    '/' + slug,      'bg-blue-100 text-blue-700',   'Get all records') +
+                        makeRow('GET',    '/' + slug + '/:id', 'bg-blue-100 text-blue-700', 'Get one record by ID') +
+                        makeRow('POST',   '/' + slug,      'bg-green-100 text-green-700', 'Add a new record') +
+                        makeRow('PATCH',  '/' + slug + '/:id', 'bg-yellow-100 text-yellow-700', 'Update a record') +
+                        makeRow('DELETE', '/' + slug + '/:id', 'bg-red-100 text-red-700',   'Delete a record') +
+                    '</tbody>' +
+                '</table>' +
+            '</div>';
+        body.appendChild(tableSection);
 
-        window.showAPIDetails = function(apiId) {
-            const api = apiDataStore[apiId];
-            if (!api) { alert('API data not found. Please refresh.'); return; }
-            const name = api.name;
-            const slug = name.toLowerCase().replace(/\s+/g, '-');
-            const phoneIp = '<your-phone-ip>';
-            const base = `http://${phoneIp}:8080`;
-            const url = `${base}/${slug}`;
+        // --- Section: Code examples ---
+        const codeSection = document.createElement('div');
+        codeSection.className = 'mb-6';
 
-            document.getElementById('apiDetailName').textContent = name;
-            document.getElementById('apiDetailDesc').textContent = api.description || 'No description';
-            document.getElementById('apiDetailBadge').textContent = api.security === 'public' ? '🔓 Public' : '🔒 Auth Required';
-            document.getElementById('apiDetailBadge').className = `px-3 py-1 rounded-full text-xs font-bold ${api.security === 'public' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+        const fetchCode =
+'// GET all records\nfetch("' + url + '")\n  .then(r => r.json())\n  .then(data => console.log(data));\n\n// POST new data\nfetch("' + url + '", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ title: "Hello", value: 42 })\n}).then(r => r.json()).then(console.log);\n\n// DELETE a record\nfetch("' + url + '/RECORD_ID", { method: "DELETE" })\n  .then(r => r.json()).then(console.log);';
 
-            // Build the full docs HTML
-            document.getElementById('apiDetailBody').innerHTML = `
-                <!-- Base URL -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-gray-800 mb-2">🔗 Your API Base URL</h3>
-                    <p class="text-sm text-gray-500 mb-2">Replace <code class="bg-gray-100 px-1 rounded">&lt;your-phone-ip&gt;</code> with your phone's IP shown in the Connected Phones section above.</p>
-                    <div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-4 py-3 font-mono text-sm">
-                        <span id="fullApiUrl" class="flex-1 break-all">${url}</span>
-                        <button onclick="navigator.clipboard.writeText(document.getElementById('fullApiUrl').textContent).then(()=>alert('✅ Copied!'))" 
-                            class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700 shrink-0">Copy</button>
-                    </div>
-                </div>
+        const curlCode =
+'# GET all records\ncurl ' + url + '\n\n# POST new data\ncurl -X POST ' + url + ' \\\n  -H "Content-Type: application/json" \\\n  -d \'{"title":"Hello","value":42}\'\n\n# DELETE a record\ncurl -X DELETE ' + url + '/RECORD_ID';
 
-                <!-- Endpoints Table -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-gray-800 mb-3">📋 Available Endpoints</h3>
-                    <div class="border rounded-lg overflow-hidden text-sm">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
-                                <tr>
-                                    <th class="text-left px-4 py-3">Method</th>
-                                    <th class="text-left px-4 py-3">Endpoint</th>
-                                    <th class="text-left px-4 py-3">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">GET</span></td>
-                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}</td>
-                                    <td class="px-4 py-3 text-gray-600">Get all records</td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">GET</span></td>
-                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
-                                    <td class="px-4 py-3 text-gray-600">Get one record by ID</td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">POST</span></td>
-                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}</td>
-                                    <td class="px-4 py-3 text-gray-600">Add a new record</td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">PATCH</span></td>
-                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
-                                    <td class="px-4 py-3 text-gray-600">Update a record</td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">DELETE</span></td>
-                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
-                                    <td class="px-4 py-3 text-gray-600">Delete a record</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        const pythonCode =
+'import requests\n\nBASE = "' + url + '"\n\n# GET all\nprint(requests.get(BASE).json())\n\n# POST new data\nres = requests.post(BASE, json={"title": "Hello", "value": 42})\nprint("Created:", res.json())\n\n# DELETE a record\nrequests.delete(f"{BASE}/RECORD_ID")';
 
-                <!-- Code Examples -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-gray-800 mb-3">💻 Code Examples</h3>
+        const axiosCode =
+'// GET all records\nconst { data } = await axios.get("' + url + '");\nconsole.log(data);\n\n// POST new data\nconst { data: created } = await axios.post("' + url + '", {\n  title: "Hello",\n  value: 42\n});\nconsole.log(created);\n\n// DELETE a record\nawait axios.delete("' + url + '/RECORD_ID");';
 
-                    <!-- Tabs -->
-                    <div class="flex gap-2 mb-3 flex-wrap">
-                        <button onclick="switchTab('fetch')" id="tab-fetch" class="tab-btn active-tab text-xs px-3 py-1.5 rounded-full font-medium">JS Fetch</button>
-                        <button onclick="switchTab('curl')" id="tab-curl" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">cURL</button>
-                        <button onclick="switchTab('python')" id="tab-python" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Python</button>
-                        <button onclick="switchTab('axios')" id="tab-axios" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Axios</button>
-                    </div>
+        codeSection.innerHTML =
+            '<h3 class="font-bold text-gray-800 mb-3">💻 Code Examples</h3>' +
+            '<div class="flex gap-2 mb-3 flex-wrap" id="detail-tabs">' +
+                '<button data-tab="fetch"  class="tab-btn active text-xs px-3 py-1.5 rounded-full font-medium">JS Fetch</button>' +
+                '<button data-tab="curl"   class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">cURL</button>' +
+                '<button data-tab="python" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Python</button>' +
+                '<button data-tab="axios"  class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Axios</button>' +
+            '</div>' +
+            makeCodePanel('fetch',  fetchCode,  false) +
+            makeCodePanel('curl',   curlCode,   true) +
+            makeCodePanel('python', pythonCode, true) +
+            makeCodePanel('axios',  axiosCode,  true);
 
-                    <!-- JS Fetch -->
-                    <div id="code-fetch" class="code-panel">
-                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
-                            <button onclick="copyCode('code-fetch')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
-<pre class="text-green-400 text-xs leading-relaxed">// ✅ GET all records
-fetch('${url}')
-  .then(r => r.json())
-  .then(data => console.log(data));
+        body.appendChild(codeSection);
 
-// ✅ POST new data
-fetch('${url}', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ title: 'Hello', value: 42 })
-})
-  .then(r => r.json())
-  .then(data => console.log('Created:', data));
+        // Tab switching
+        codeSection.querySelectorAll('[data-tab]').forEach(btn => {
+            btn.onclick = function() {
+                codeSection.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.getAttribute('data-tab');
+                codeSection.querySelectorAll('.code-panel').forEach(p => p.classList.add('hidden'));
+                codeSection.querySelector('#cp-' + tab).classList.remove('hidden');
+            };
+        });
 
-// ✅ DELETE a record
-fetch('${url}/RECORD_ID', { method: 'DELETE' })
-  .then(r => r.json())
-  .then(data => console.log(data));</pre>
-                        </div>
-                    </div>
+        // Copy buttons for code panels
+        codeSection.querySelectorAll('.copy-code-btn').forEach(btn => {
+            btn.onclick = function() {
+                const panelId = btn.getAttribute('data-panel');
+                const pre = document.querySelector('#' + panelId + ' pre');
+                if (pre) navigator.clipboard.writeText(pre.textContent).then(() => alert('✅ Code copied!'));
+            };
+        });
 
-                    <!-- cURL -->
-                    <div id="code-curl" class="code-panel hidden">
-                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
-                            <button onclick="copyCode('code-curl')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
-<pre class="text-green-400 text-xs leading-relaxed"># GET all records
-curl ${url}
+        // --- Section: How it works ---
+        const howSection = document.createElement('div');
+        howSection.className = 'bg-blue-50 border border-blue-200 rounded-xl p-4';
+        howSection.innerHTML =
+            '<h3 class="font-bold text-blue-800 mb-2">⚡ How It Works</h3>' +
+            '<ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">' +
+                '<li>Your phone runs an HTTP server on port <strong>8080</strong> via Termux</li>' +
+                '<li>Your app/website sends requests to <strong>http://PHONE-IP:8080/' + slug + '</strong></li>' +
+                '<li>Data is stored in a JSON file on your phone</li>' +
+                '<li>You and your phone must be on the <strong>same WiFi</strong> network</li>' +
+                '<li>Find your phone IP in the <strong>Connected Phones</strong> section above</li>' +
+            '</ol>';
+        body.appendChild(howSection);
 
-# POST new data
-curl -X POST ${url} \\
-  -H "Content-Type: application/json" \\
-  -d '{"title":"Hello","value":42}'
+        // Show modal
+        document.getElementById('apiDetailsModal').classList.add('active');
+    }
 
-# DELETE a record
-curl -X DELETE ${url}/RECORD_ID</pre>
-                        </div>
-                    </div>
+    function makeRow(method, path, colorClass, action) {
+        return '<tr class="hover:bg-gray-50">' +
+            '<td class="px-4 py-3"><span class="' + colorClass + ' px-2 py-0.5 rounded text-xs font-bold">' + method + '</span></td>' +
+            '<td class="px-4 py-3 font-mono text-xs text-gray-700">' + path + '</td>' +
+            '<td class="px-4 py-3 text-gray-600">' + action + '</td>' +
+            '</tr>';
+    }
 
-                    <!-- Python -->
-                    <div id="code-python" class="code-panel hidden">
-                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
-                            <button onclick="copyCode('code-python')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
-<pre class="text-green-400 text-xs leading-relaxed">import requests
-
-BASE = '${url}'
-
-# GET all records
-res = requests.get(BASE)
-print(res.json())
-
-# POST new data
-res = requests.post(BASE, json={'title': 'Hello', 'value': 42})
-print('Created:', res.json())
-
-# DELETE a record
-res = requests.delete(f'{BASE}/RECORD_ID')
-print(res.json())</pre>
-                        </div>
-                    </div>
-
-                    <!-- Axios -->
-                    <div id="code-axios" class="code-panel hidden">
-                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
-                            <button onclick="copyCode('code-axios')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
-<pre class="text-green-400 text-xs leading-relaxed">// ✅ GET all records
-const { data } = await axios.get('${url}');
-console.log(data);
-
-// ✅ POST new data
-const { data: created } = await axios.post('${url}', {
-  title: 'Hello',
-  value: 42
-});
-console.log('Created:', created);
-
-// ✅ DELETE a record
-await axios.delete('${url}/RECORD_ID');</pre>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- How it works -->
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <h3 class="font-bold text-blue-800 mb-2">⚡ How It Works</h3>
-                    <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-                        <li>Your phone runs a local HTTP server on port <strong>8080</strong></li>
-                        <li>Your API lives at the URL shown above</li>
-                        <li>Data is stored in a JSON file on your phone</li>
-                        <li>Send HTTP requests from any app, website, or script</li>
-                        <li>Both your phone and the client must be on the <strong>same WiFi network</strong></li>
-                    </ol>
-                </div>
-            `;
-
-            document.getElementById('apiDetailsModal').classList.add('active');
-        };
-
-        window.switchTab = function(tab) {
-            document.querySelectorAll('.code-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('active-tab');
-                b.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            document.getElementById('code-' + tab).classList.remove('hidden');
-            const btn = document.getElementById('tab-' + tab);
-            btn.classList.add('active-tab');
-            btn.classList.remove('bg-gray-100', 'text-gray-600');
-        };
-
-        window.copyCode = function(panelId) {
-            const pre = document.querySelector('#' + panelId + ' pre');
-            if (pre) {
-                navigator.clipboard.writeText(pre.textContent).then(() => alert('✅ Code copied!'));
-            }
-        };
-    </script>
-    <!-- API Details Modal -->
-    <div id="apiDetailsModal" class="modal">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height:90vh;">
-            <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b shrink-0">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <h2 class="text-xl font-bold" id="apiDetailName">API Details</h2>
-                    <span id="apiDetailBadge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
-                </div>
-                <button onclick="document.getElementById('apiDetailsModal').classList.remove('active')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <p class="px-6 pt-3 text-sm text-gray-500" id="apiDetailDesc"></p>
-            <!-- Scrollable body -->
-            <div id="apiDetailBody" class="overflow-y-auto p-6 flex-1"></div>
-        </div>
-    </div>
-
-    <style>
-        .active-tab { background: #2563eb !important; color: white !important; }
-        .tab-btn { background: #f3f4f6; color: #4b5563; transition: all 0.15s; }
-        .tab-btn:hover { background: #e5e7eb; }
-    </style>
-
+    function makeCodePanel(id, code, hidden) {
+        return '<div id="cp-' + id + '" class="code-panel ' + (hidden ? 'hidden' : '') + '">' +
+            '<div class="relative bg-gray-900 rounded-lg p-4 overflow-x-auto">' +
+                '<button class="copy-code-btn absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded" data-panel="cp-' + id + '">Copy</button>' +
+                '<pre class="text-green-400 text-xs leading-relaxed">' + escHtml(code) + '</pre>' +
+            '</div>' +
+        '</div>';
+    }
+</script>
 </body>
 </html>
