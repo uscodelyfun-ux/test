@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phone Backend - Firebase-like Platform</title>
+    <title>Phone Backend Platform - Complete</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-text {
-            background: linear-gradient(to right, #2563eb, #9333ea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
         }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -20,224 +29,822 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(4px);
         }
+        
         .modal.active { display: flex; }
-        .pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        .tree-item { cursor: pointer; user-select: none; }
-        .tree-item:hover { background-color: #f3f4f6; }
-        .tree-children { margin-left: 1.5rem; }
-        .nav-item.active { background-color: #1f2937 !important; }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .tree-item {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        
+        .tree-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(2px);
+        }
+        
+        .tree-children {
+            margin-left: 1.5rem;
+            border-left: 2px solid #e5e7eb;
+            padding-left: 0.5rem;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        .editor-container {
+            height: 500px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #6b7280; }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast.show { display: flex; }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Landing Page -->
     <div id="landingPage">
-        <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        <div class="gradient-bg min-h-screen flex items-center justify-center px-4">
+            <div class="max-w-4xl text-center text-white">
+                <div class="mb-8">
+                    <svg class="h-20 w-20 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
-                    <span class="font-bold text-xl">Phone Backend</span>
+                    <h1 class="text-5xl font-bold mb-4">Phone Backend Platform</h1>
+                    <p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+                        Turn your old Android phone into a complete backend server with database, APIs, and real-time sync - completely free!
+                    </p>
                 </div>
-                <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Get Started</button>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showDashboard()" class="bg-white text-purple-700 px-8 py-4 rounded-lg font-bold text-lg hover:bg-purple-50 transition-all transform hover:scale-105">
+                        Get Started Free
+                    </button>
+                    <button onclick="scrollToFeatures()" class="border-2 border-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-purple-700 transition-all">
+                        Learn More
+                    </button>
+                </div>
+                <div class="mt-12 grid grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-bold">100%</div>
+                        <div class="text-purple-200">Free Forever</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold">∞</div>
+                        <div class="text-purple-200">Unlimited Data</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold">2</div>
+                        <div class="text-purple-200">APIs per User</div>
+                    </div>
+                </div>
             </div>
-        </header>
-        <section class="container mx-auto px-4 py-20 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">Firebase-like Backend on Your Phone</h1>
-            <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                Full database viewer, collections, documents, and real-time sync - just like Firebase!
-            </p>
-            <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 text-lg font-medium">Start Building Free</button>
-        </section>
+        </div>
     </div>
 
     <!-- Dashboard -->
     <div id="dashboardPage" class="hidden">
-        <!-- Sign In -->
-        <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        <!-- Sign In Screen -->
+        <div id="signInScreen" class="min-h-screen flex items-center justify-center gradient-bg">
             <div class="max-w-md w-full mx-4">
-                <div class="bg-white p-8 rounded-lg shadow-lg border text-center">
-                    <svg class="h-16 w-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                <div class="bg-white p-8 rounded-2xl shadow-2xl text-center">
+                    <svg class="h-16 w-16 text-purple-600 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
-                    <h1 class="text-2xl font-bold mb-2">Welcome to Phone Backend</h1>
-                    <p class="text-gray-600 mb-6">Sign in with Google to get started</p>
-                    <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium">Sign in with Google</button>
+                    <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+                    <p class="text-gray-600 mb-8">Sign in to access your phone backend</p>
+                    <button onclick="signInWithGoogle()" class="w-full bg-purple-600 text-white px-6 py-4 rounded-lg font-bold hover:bg-purple-700 transition-all transform hover:scale-105">
+                        <div class="flex items-center justify-center gap-3">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Sign in with Google
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Main Dashboard -->
-        <div id="mainDashboard" class="hidden">
-            <div class="flex h-screen">
-                <!-- Sidebar -->
-                <div class="w-64 bg-gray-900 text-white flex flex-col">
-                    <div class="p-4 border-b border-gray-700">
-                        <div class="flex items-center gap-2">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        <div id="mainDashboard" class="hidden h-screen flex">
+            <!-- Sidebar -->
+            <div class="w-64 bg-gray-900 text-white flex flex-col">
+                <div class="p-6 border-b border-gray-800">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                             </svg>
-                            <span class="font-bold">Phone Backend</span>
                         </div>
-                    </div>
-
-                    <nav class="flex-1 p-4 space-y-1">
-                        <button onclick="showSection('overview')" id="nav-overview" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                            Overview
-                        </button>
-                        <button onclick="showSection('database')" id="nav-database" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
-                            Database
-                        </button>
-                        <button onclick="showSection('phones')" id="nav-phones" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                            Phones <span id="phonesBadge" class="ml-auto bg-green-600 px-2 py-0.5 rounded text-xs">0</span>
-                        </button>
-                    </nav>
-
-                    <div class="p-4 border-t border-gray-700">
-                        <div class="flex items-center gap-2 mb-2">
-                            <img id="sidebarUserPhoto" class="w-8 h-8 rounded-full" src="">
-                            <div class="flex-1 min-w-0">
-                                <p id="sidebarUserName" class="text-sm font-medium truncate"></p>
-                            </div>
+                        <div>
+                            <div class="font-bold text-lg">PhoneBackend</div>
+                            <div class="text-xs text-gray-400">v1.0.0</div>
                         </div>
-                        <button onclick="signOut()" class="w-full text-sm text-gray-400 hover:text-white">Sign Out</button>
                     </div>
                 </div>
 
-                <!-- Main Content -->
-                <div class="flex-1 overflow-auto">
-                    <!-- Overview Section -->
-                    <div id="overviewSection" class="hidden p-8">
-                        <h1 class="text-3xl font-bold mb-8">Overview</h1>
-                        <div class="grid grid-cols-4 gap-6 mb-8">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                                <div class="text-gray-600 mb-2">Collections</div>
-                                <div class="text-3xl font-bold" id="collectionsCount">0</div>
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin">
+                    <button onclick="showSection('overview')" id="nav-overview" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span class="font-medium">Overview</span>
+                    </button>
+                    
+                    <button onclick="showSection('database')" id="nav-database" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+                        <span class="font-medium">Database</span>
+                    </button>
+                    
+                    <button onclick="showSection('apis')" id="nav-apis" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span class="font-medium">APIs</span>
+                        <span id="apiLimitBadge" class="ml-auto text-xs bg-purple-600 px-2 py-0.5 rounded">0/2</span>
+                    </button>
+                    
+                    <button onclick="showSection('phones')" id="nav-phones" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        <span class="font-medium">Phones</span>
+                        <span id="phonesBadge" class="ml-auto text-xs bg-green-600 px-2 py-0.5 rounded">0</span>
+                    </button>
+                    
+                    <button onclick="showSection('rules')" id="nav-rules" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <span class="font-medium">Rules</span>
+                    </button>
+                    
+                    <button onclick="showSection('logs')" id="nav-logs" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <span class="font-medium">Logs</span>
+                    </button>
+                    
+                    <button onclick="showSection('docs')" id="nav-docs" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 flex items-center gap-3 transition-all">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <span class="font-medium">Docs</span>
+                    </button>
+                </nav>
+
+                <div class="p-4 border-t border-gray-800">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img id="sidebarUserPhoto" class="w-10 h-10 rounded-full border-2 border-purple-500" src="">
+                        <div class="flex-1 min-w-0">
+                            <p id="sidebarUserName" class="text-sm font-medium truncate"></p>
+                            <p id="sidebarUserEmail" class="text-xs text-gray-400 truncate"></p>
+                        </div>
+                    </div>
+                    <button onclick="signOut()" class="w-full text-sm text-gray-400 hover:text-white px-3 py-2 rounded hover:bg-gray-800 transition-all">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 overflow-auto scrollbar-thin">
+                <!-- SECTION 1: OVERVIEW -->
+                <div id="overviewSection" class="hidden p-8">
+                    <div class="max-w-7xl mx-auto">
+                        <h1 class="text-4xl font-bold mb-2">Welcome to Phone Backend!</h1>
+                        <p class="text-gray-600 mb-8">Your complete backend platform powered by your old Android phone</p>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-2 border-purple-100 hover:border-purple-300 transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-gray-600 font-medium">APIs</span>
+                                    <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="text-4xl font-bold mb-1" id="overviewApiCount">0 / 2</div>
+                                <div class="text-sm text-gray-500">APIs created</div>
                             </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                                <div class="text-gray-600 mb-2">Documents</div>
-                                <div class="text-3xl font-bold" id="documentsCount">0</div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-2 border-green-100 hover:border-green-300 transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-gray-600 font-medium">Phones</span>
+                                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="text-4xl font-bold mb-1" id="overviewPhoneCount">0</div>
+                                <div class="text-sm text-gray-500">Connected devices</div>
                             </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                                <div class="text-gray-600 mb-2">Phones</div>
-                                <div class="text-3xl font-bold" id="phonesCount">0</div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-2 border-blue-100 hover:border-blue-300 transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-gray-600 font-medium">Collections</span>
+                                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                </div>
+                                <div class="text-4xl font-bold mb-1" id="overviewCollectionCount">0</div>
+                                <div class="text-sm text-gray-500">Database collections</div>
                             </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                                <div class="text-gray-600 mb-2">Status</div>
-                                <div class="text-3xl font-bold" id="statusDisplay">Offline</div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-2 border-orange-100 hover:border-orange-300 transition-all">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-gray-600 font-medium">Documents</span>
+                                    <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="text-4xl font-bold mb-1" id="overviewDocCount">0</div>
+                                <div class="text-sm text-gray-500">Total documents</div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h2 class="text-2xl font-bold mb-4">Quick Start</h2>
+                                <div class="space-y-4">
+                                    <div class="flex gap-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center font-bold text-purple-700">1</div>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold mb-1">Connect Your Phone</div>
+                                            <div class="text-sm text-gray-600">Install the app on your old Android phone</div>
+                                            <button onclick="showSection('phones')" class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                                Go to Phones →
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex gap-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center font-bold text-purple-700">2</div>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold mb-1">Create an API</div>
+                                            <div class="text-sm text-gray-600">Set up your first API endpoint</div>
+                                            <button onclick="showSection('apis')" class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                                Create API →
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex gap-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center font-bold text-purple-700">3</div>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold mb-1">Add Data</div>
+                                            <div class="text-sm text-gray-600">Create collections and documents</div>
+                                            <button onclick="showSection('database')" class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                                Open Database →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-purple-600 to-pink-600 p-6 rounded-xl shadow-lg text-white">
+                                <h2 class="text-2xl font-bold mb-4">Status</h2>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur">
+                                        <span>Platform</span>
+                                        <span class="badge badge-success">Online</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur">
+                                        <span>Phones</span>
+                                        <span id="overviewPhoneStatus" class="badge badge-warning">Offline</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur">
+                                        <span>Database</span>
+                                        <span id="overviewDbStatus" class="badge badge-info">Ready</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <h2 class="text-2xl font-bold mb-4">Recent Activity</h2>
+                            <div id="recentActivity" class="space-y-3">
+                                <div class="text-gray-500 text-center py-8">No recent activity</div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Database Section -->
-                    <div id="databaseSection" class="p-8">
+                <!-- SECTION 2: DATABASE (Firebase-like) -->
+                <div id="databaseSection" class="p-8">
+                    <div class="max-w-7xl mx-auto">
                         <div class="flex items-center justify-between mb-6">
-                            <h1 class="text-3xl font-bold">Database</h1>
+                            <div>
+                                <h1 class="text-4xl font-bold mb-2">Database</h1>
+                                <p class="text-gray-600">Browse and manage your phone's database</p>
+                            </div>
                             <div class="flex gap-3">
-                                <button onclick="refreshDatabase()" class="px-4 py-2 border rounded-md hover:bg-gray-50 flex items-center gap-2">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                <button onclick="refreshDatabase()" class="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:text-purple-600 transition-all flex items-center gap-2 font-medium">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                     Refresh
                                 </button>
-                                <button onclick="showAddCollectionModal()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">+ Add Collection</button>
+                                <button onclick="showAddCollectionModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">
+                                    + Add Collection
+                                </button>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-12 gap-6">
-                            <div class="col-span-4 bg-white rounded-lg shadow-sm border">
-                                <div class="p-4 border-b">
-                                    <h2 class="font-bold">Collections</h2>
+                            <!-- Collections Tree -->
+                            <div class="col-span-12 lg:col-span-4 bg-white rounded-xl shadow-sm border">
+                                <div class="p-4 border-b bg-gray-50 rounded-t-xl">
+                                    <h2 class="font-bold text-lg">Collections</h2>
                                 </div>
-                                <div id="collectionsTree" class="p-4 space-y-1">
-                                    <div class="text-gray-500 text-sm">No phone selected. Go to Phones section and click "View Data"</div>
+                                <div id="collectionsTree" class="p-4 space-y-1 min-h-[500px] max-h-[600px] overflow-y-auto scrollbar-thin">
+                                    <div class="text-gray-500 text-sm text-center py-12">
+                                        <svg class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                        </svg>
+                                        <p class="mb-2">No data yet</p>
+                                        <p class="text-xs">Connect a phone and add collections</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-span-8 bg-white rounded-lg shadow-sm border">
-                                <div class="p-4 border-b flex items-center justify-between">
-                                    <h2 class="font-bold" id="documentTitle">Select a document</h2>
+                            <!-- Document Editor -->
+                            <div class="col-span-12 lg:col-span-8 bg-white rounded-xl shadow-sm border">
+                                <div class="p-4 border-b bg-gray-50 rounded-t-xl flex items-center justify-between">
+                                    <h2 class="font-bold text-lg" id="documentTitle">Select a document</h2>
                                     <div id="documentActions" class="hidden flex gap-2">
-                                        <button onclick="saveDocument()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Save</button>
-                                        <button onclick="deleteDocument()" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Delete</button>
+                                        <button onclick="saveDocument()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm font-medium">
+                                            Save
+                                        </button>
+                                        <button onclick="deleteDocument()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm font-medium">
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
-                                <div id="documentContent" class="p-4">
-                                    <div class="text-center py-12 text-gray-500">
-                                        <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div id="documentContent" class="p-6 min-h-[500px]">
+                                    <div class="text-center py-24 text-gray-500">
+                                        <svg class="h-20 w-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
-                                        <p>Select a phone and collection to view data</p>
+                                        <p class="text-lg font-medium">No document selected</p>
+                                        <p class="text-sm mt-2">Select a collection or document from the tree</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Phones Section -->
-                    <div id="phonesSection" class="hidden p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h1 class="text-3xl font-bold">Connected Phones</h1>
-                            <button onclick="showConnectPhoneModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">+ Connect Phone</button>
-                        </div>
-                        <div id="phonesList" class="grid gap-4">
-                            <div class="text-center py-12 text-gray-500">
-                                <p>Loading phones...</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- SECTION 3: APIs -->
+                <div id="apisSection" class="hidden p-8">
+                    <div class="max-w-5xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-4xl font-bold mb-2">API Management</h1>
+                                <p class="text-gray-600">Create and manage your API endpoints (Max 2 per user)</p>
+                            </div>
+                            <button onclick="showCreateAPIModal()" id="createApiBtn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-bold">
+                                + Create API
+                            </button>
+                        </div>
+
+                        <div id="apisList" class="space-y-6">
+                            <div class="text-center py-24 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                                <svg class="h-20 w-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-lg font-medium text-gray-600 mb-2">No APIs yet</p>
+                                <p class="text-sm text-gray-500 mb-4">Create your first API to get started</p>
+                                <button onclick="showCreateAPIModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">
+                                    Create Your First API
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: PHONES -->
+                <div id="phonesSection" class="hidden p-8">
+                    <div class="max-w-5xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-4xl font-bold mb-2">Connected Phones</h1>
+                                <p class="text-gray-600">Manage your backend phones</p>
+                            </div>
+                            <button onclick="showConnectPhoneModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-bold flex items-center gap-2">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                Connect Phone
+                            </button>
+                        </div>
+
+                        <div id="phonesList" class="space-y-4">
+                            <div class="text-center py-24 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                                <svg class="h-20 w-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-lg font-medium text-gray-600 mb-2">No phones connected</p>
+                                <p class="text-sm text-gray-500 mb-4">Connect your first phone to get started</p>
+                                <button onclick="showConnectPhoneModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium">
+                                    Connect Your First Phone
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: RULES -->
+                <div id="rulesSection" class="hidden p-8">
+                    <div class="max-w-5xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-4xl font-bold mb-2">Security Rules</h1>
+                                <p class="text-gray-600">Define access control for your database</p>
+                            </div>
+                            <button onclick="saveRules()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-bold">
+                                Publish Rules
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                            <div class="p-4 bg-gray-50 border-b">
+                                <div class="flex items-center gap-4">
+                                    <button onclick="loadRulesTemplate('public')" class="text-sm px-3 py-1.5 bg-white border rounded hover:border-purple-500 hover:text-purple-600 transition-all">
+                                        Public Read
+                                    </button>
+                                    <button onclick="loadRulesTemplate('private')" class="text-sm px-3 py-1.5 bg-white border rounded hover:border-purple-500 hover:text-purple-600 transition-all">
+                                        Private
+                                    </button>
+                                    <button onclick="loadRulesTemplate('auth')" class="text-sm px-3 py-1.5 bg-white border rounded hover:border-purple-500 hover:text-purple-600 transition-all">
+                                        Auth Required
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea id="rulesEditor" class="w-full h-96 p-6 font-mono text-sm focus:outline-none" placeholder="Enter your security rules...">
+{
+  "rules": {
+    ".read": true,
+    ".write": "auth != null"
+  }
+}</textarea>
+                        </div>
+
+                        <div class="mt-6 bg-blue-50 p-6 rounded-xl border border-blue-200">
+                            <h3 class="font-bold mb-2 text-blue-900">📘 Rules Guide</h3>
+                            <div class="text-sm text-blue-800 space-y-2">
+                                <p><code class="bg-white px-2 py-1 rounded">.read</code> - Controls who can read data</p>
+                                <p><code class="bg-white px-2 py-1 rounded">.write</code> - Controls who can write data</p>
+                                <p><code class="bg-white px-2 py-1 rounded">auth</code> - Current authenticated user</p>
+                                <p><code class="bg-white px-2 py-1 rounded">$variable</code> - Dynamic path segments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: LOGS -->
+                <div id="logsSection" class="hidden p-8">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-4xl font-bold mb-2">API Logs</h1>
+                                <p class="text-gray-600">Monitor your API requests</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="refreshLogs()" class="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-purple-500 transition-all font-medium">
+                                    Refresh
+                                </button>
+                                <button onclick="clearLogs()" class="px-4 py-2 border-2 border-red-300 text-red-600 rounded-lg hover:border-red-500 hover:bg-red-50 transition-all font-medium">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 border-b">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Time</th>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Method</th>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Path</th>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Status</th>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Duration</th>
+                                            <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Phone</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="logsTableBody">
+                                        <tr>
+                                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                                No logs yet. Logs will appear here when you make API requests.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: DOCS -->
+                <div id="docsSection" class="hidden p-8">
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="text-4xl font-bold mb-2">Documentation</h1>
+                        <p class="text-gray-600 mb-8">Learn how to use Phone Backend Platform</p>
+
+                        <div class="space-y-6">
+                            <!-- Getting Started -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h2 class="text-2xl font-bold mb-4">🚀 Getting Started</h2>
+                                <div class="prose prose-purple max-w-none">
+                                    <ol class="space-y-3">
+                                        <li><strong>Connect your phone:</strong> Install Termux on an old Android device</li>
+                                        <li><strong>Run the connector:</strong> Execute the setup script in Termux</li>
+                                        <li><strong>Create an API:</strong> Set up your first API endpoint</li>
+                                        <li><strong>Add data:</strong> Create collections and documents in the database</li>
+                                        <li><strong>Use your API:</strong> Make requests from any application</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- Phone Setup -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h2 class="text-2xl font-bold mb-4">📱 Phone Setup</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h3 class="font-bold mb-2">Step 1: Install Termux</h3>
+                                        <p class="text-sm text-gray-600 mb-2">Download Termux from F-Droid (NOT Google Play):</p>
+                                        <a href="https://f-droid.org/en/packages/com.termux/" target="_blank" class="text-purple-600 hover:underline text-sm">
+                                            https://f-droid.org/en/packages/com.termux/
+                                        </a>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="font-bold mb-2">Step 2: Run Setup</h3>
+                                        <div class="code-block">
+                                            <code class="text-sm">
+# Update packages<br>
+pkg update && pkg upgrade -y<br><br>
+# Install Node.js<br>
+pkg install nodejs -y<br><br>
+# Download connector<br>
+wget https://your-domain.com/connect.js<br><br>
+# Run it<br>
+node connect.js your@email.com
+                                            </code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API Examples -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h2 class="text-2xl font-bold mb-4">💻 API Examples</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h3 class="font-bold mb-2">JavaScript / Fetch</h3>
+                                        <div class="code-block">
+                                            <code class="text-sm">
+// Create a document<br>
+fetch('https://domain.com/api/u/username/todos', {<br>
+&nbsp;&nbsp;method: 'POST',<br>
+&nbsp;&nbsp;headers: { 'Content-Type': 'application/json' },<br>
+&nbsp;&nbsp;body: JSON.stringify({ title: 'Learn backend', done: false })<br>
+})<br>
+.then(res => res.json())<br>
+.then(data => console.log(data));
+                                            </code>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="font-bold mb-2">cURL</h3>
+                                        <div class="code-block">
+                                            <code class="text-sm">
+# Get all documents<br>
+curl https://domain.com/api/u/username/todos<br><br>
+# Create document<br>
+curl -X POST https://domain.com/api/u/username/todos \<br>
+&nbsp;&nbsp;-H "Content-Type: application/json" \<br>
+&nbsp;&nbsp;-d '{"title":"New todo","done":false}'
+                                            </code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Troubleshooting -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h2 class="text-2xl font-bold mb-4">🔧 Troubleshooting</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h3 class="font-bold mb-1">Phone not connecting?</h3>
+                                        <p class="text-sm text-gray-600">Check internet connection and make sure email matches dashboard login</p>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold mb-1">API returns 503?</h3>
+                                        <p class="text-sm text-gray-600">Phone is offline. Make sure connector is running on your phone</p>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold mb-1">Collections not showing?</h3>
+                                        <p class="text-sm text-gray-600">Refresh the database view or check if phone is selected</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Collection Modal -->
+    <div id="addCollectionModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 transform transition-all">
+            <h2 class="text-2xl font-bold mb-4">Add Collection</h2>
+            <input type="text" id="collectionName" placeholder="Collection name (e.g., users, posts)" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 focus:border-purple-500 focus:outline-none transition-all">
+            <div class="flex gap-3">
+                <button onclick="closeAddCollectionModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium">Cancel</button>
+                <button onclick="createCollection()" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Document Modal -->
+    <div id="addDocumentModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6">
+            <h2 class="text-2xl font-bold mb-4">Add Document</h2>
+            <input type="text" id="documentId" placeholder="Document ID (auto-generated if empty)" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 focus:border-purple-500 focus:outline-none">
+            <textarea id="documentData" placeholder='{"field": "value"}' class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 font-mono text-sm focus:border-purple-500 focus:outline-none" rows="10"></textarea>
+            <div class="flex gap-3">
+                <button onclick="closeAddDocumentModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium">Cancel</button>
+                <button onclick="createDocument()" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create API Modal -->
+    <div id="createAPIModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h2 class="text-2xl font-bold mb-4">Create API</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Name</label>
+                    <input type="text" id="apiName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none" placeholder="My Todo API">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="apiDescription" rows="3" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none" placeholder="A simple todo list backend"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Security</label>
+                    <select id="apiSecurity" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none">
+                        <option value="public">🌐 Public (No authentication)</option>
+                        <option value="password">🔑 Password Protected</option>
+                        <option value="auth">🔒 Authenticated (Google sign-in)</option>
+                    </select>
+                </div>
+                <div id="apiPasswordField" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Password</label>
+                    <input type="password" id="apiPassword" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none" placeholder="Enter a password">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeCreateAPIModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium">Cancel</button>
+                <button onclick="createAPI()" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">Create API</button>
             </div>
         </div>
     </div>
 
     <!-- Connect Phone Modal -->
     <div id="connectPhoneModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-8">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-8">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold">Connect Your Phone</h2>
+                <h2 class="text-3xl font-bold">Connect Your Phone</h2>
                 <button onclick="closeConnectPhoneModal()" class="text-gray-500 hover:text-gray-700">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="space-y-4">
-                <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm">
-                    <div class="mb-2 text-gray-400"># Step 1: Install Node.js (if not installed)</div>
-                    pkg update && pkg install nodejs -y<br><br>
-                    <div class="mb-2 text-gray-400"># Step 2: Download connector</div>
-                    wget https://your-url.com/connect.js<br><br>
-                    <div class="mb-2 text-gray-400"># Step 3: Connect!</div>
-                    node connect.js <span id="modalUserEmail"></span>
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200">
+                    <h3 class="font-bold text-lg mb-3">📱 On Your Android Phone (Termux)</h3>
+                    <div class="space-y-3">
+                        <div class="code-block">
+                            <div class="text-xs text-gray-400 mb-2"># Step 1: Install Node.js</div>
+                            <code class="text-sm">pkg update && pkg install nodejs -y</code>
+                        </div>
+                        <div class="code-block">
+                            <div class="text-xs text-gray-400 mb-2"># Step 2: Download connector</div>
+                            <code class="text-sm">wget https://your-domain.com/connect.js</code>
+                        </div>
+                        <div class="code-block">
+                            <div class="text-xs text-gray-400 mb-2"># Step 3: Connect!</div>
+                            <code class="text-sm">node connect.js <span id="modalUserEmail" class="text-yellow-400"></span></code>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-600">Run these commands in Termux on your Android phone. Your phone will appear in the list once connected.</p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <p class="text-sm text-blue-800">
+                        💡 <strong>Tip:</strong> Your phone will appear in the list once connected. Make sure to use the same email you signed in with!
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Add Collection Modal -->
-    <div id="addCollectionModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 class="text-2xl font-bold mb-4">Add Collection</h2>
-            <input type="text" id="collectionName" placeholder="Collection name (e.g., users)" class="w-full px-3 py-2 border rounded-md mb-4">
-            <div class="flex gap-3">
-                <button onclick="closeAddCollectionModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
-                <button onclick="createCollection()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
-            </div>
-        </div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <svg id="toastIcon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+        <span id="toastMessage"></span>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase & App Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+        import { getFirestore, collection, query, where, getDocs, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp, limit } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
@@ -255,19 +862,48 @@
         let currentUser = null;
         let selectedPhone = null;
         let databaseData = {};
+        let currentCollection = null;
 
+        // Toast notification
+        window.showToast = function(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            const icons = {
+                success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>',
+                info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+            };
+            
+            const colors = {
+                success: 'text-green-600',
+                error: 'text-red-600',
+                info: 'text-blue-600'
+            };
+            
+            toastIcon.innerHTML = icons[type];
+            toastIcon.className = `h-6 w-6 ${colors[type]}`;
+            toastMessage.textContent = message;
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        // Auth functions
         window.signInWithGoogle = async function() {
             try {
                 await signInWithPopup(auth, new GoogleAuthProvider());
             } catch (error) {
                 console.error('Sign in error:', error);
-                alert('Sign in failed: ' + error.message);
+                showToast('Sign in failed: ' + error.message, 'error');
             }
         };
 
         window.signOut = async function() {
             try {
                 await firebaseSignOut(auth);
+                showToast('Signed out successfully', 'info');
             } catch (error) {
                 console.error('Sign out error:', error);
             }
@@ -277,7 +913,7 @@
             if (user) {
                 currentUser = user;
                 showMainDashboard();
-                loadPhones();
+                loadAllData();
             } else {
                 currentUser = null;
                 document.getElementById('signInScreen').classList.remove('hidden');
@@ -289,150 +925,207 @@
             document.getElementById('signInScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
             document.getElementById('sidebarUserName').textContent = currentUser.displayName || 'User';
+            document.getElementById('sidebarUserEmail').textContent = currentUser.email;
             document.getElementById('sidebarUserPhoto').src = currentUser.photoURL || '';
             document.getElementById('modalUserEmail').textContent = currentUser.email;
-            showSection('phones');
+            showSection('overview');
         }
 
+        // Load all data (phones, APIs)
+        async function loadAllData() {
+            loadPhones();
+            loadAPIs();
+        }
+
+        // Load phones
         function loadPhones() {
-            console.log('Loading phones for user:', currentUser.email);
-            
-            const phonesQuery = query(
-                collection(db, 'phones'), 
-                where('userId', '==', currentUser.email)
-            );
+            const phonesQuery = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
             
             onSnapshot(phonesQuery, (snapshot) => {
-                console.log('Phones snapshot received:', snapshot.size, 'phones');
-                
                 const count = snapshot.size;
                 document.getElementById('phonesBadge').textContent = count;
-                document.getElementById('phonesCount').textContent = count;
+                document.getElementById('overviewPhoneCount').textContent = count;
                 
                 const phonesList = document.getElementById('phonesList');
                 
                 if (snapshot.empty) {
                     phonesList.innerHTML = `
-                        <div class="col-span-full bg-white p-12 rounded-lg shadow-sm border text-center">
-                            <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="text-center py-24 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                            <svg class="h-20 w-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
-                            <h3 class="text-lg font-bold mb-2 text-gray-700">No Phones Connected</h3>
-                            <p class="text-gray-500 mb-4">Connect your Android phone to get started</p>
-                            <button onclick="showConnectPhoneModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                + Connect Phone
+                            <p class="text-lg font-medium text-gray-600 mb-2">No phones connected</p>
+                            <p class="text-sm text-gray-500 mb-4">Connect your first phone to get started</p>
+                            <button onclick="showConnectPhoneModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium">
+                                Connect Your First Phone
                             </button>
                         </div>
                     `;
-                    document.getElementById('statusDisplay').textContent = 'Offline';
-                    document.getElementById('statusDisplay').className = 'text-3xl font-bold text-red-600';
+                    document.getElementById('overviewPhoneStatus').textContent = 'Offline';
+                    document.getElementById('overviewPhoneStatus').className = 'badge badge-warning';
                 } else {
                     phonesList.innerHTML = '';
                     let hasOnline = false;
                     
                     snapshot.forEach(docSnap => {
                         const phone = docSnap.data();
-                        console.log('Phone data:', phone);
-                        
                         const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
                         if (isOnline) hasOnline = true;
                         
                         const el = document.createElement('div');
-                        el.className = 'bg-white p-6 rounded-lg shadow-sm border ' + (isOnline ? 'border-green-200' : '');
+                        el.className = 'bg-white p-6 rounded-xl shadow-sm border-2 ' + (isOnline ? 'border-green-200' : 'border-gray-200');
                         el.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 ${isOnline ? 'bg-green-100' : 'bg-gray-100'} rounded-full flex items-center justify-center">
-                                        <svg class="h-6 w-6 ${isOnline ? 'text-green-600' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-16 h-16 ${isOnline ? 'bg-green-100' : 'bg-gray-100'} rounded-xl flex items-center justify-center">
+                                        <svg class="h-8 w-8 ${isOnline ? 'text-green-600' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="font-bold text-lg">${phone.deviceName || 'Android Phone'}</h3>
+                                        <h3 class="text-xl font-bold">${phone.deviceName || 'Android Phone'}</h3>
                                         <p class="text-sm text-gray-600">${phone.model || 'Unknown Model'}</p>
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <span class="flex items-center gap-1 text-sm">
-                                                <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'} ${isOnline ? 'pulse' : ''}"></span>
-                                                <span class="${isOnline ? 'text-green-600' : 'text-gray-500'} font-medium">${isOnline ? 'Online' : 'Offline'}</span>
-                                            </span>
-                                            ${phone.ip ? `<span class="text-xs text-gray-500">• ${phone.ip}</span>` : ''}
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="status-dot ${isOnline ? 'status-online pulse' : 'status-offline'}"></span>
+                                            <span class="text-sm font-medium ${isOnline ? 'text-green-600' : 'text-gray-500'}">${isOnline ? 'Online' : 'Offline'}</span>
+                                            ${phone.ip ? `<span class="text-xs text-gray-400">• ${phone.ip}</span>` : ''}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col gap-2">
-                                    <button onclick="window.selectPhone('${phone.ip}')" class="px-4 py-2 ${isOnline ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400'} text-white rounded-md text-sm" ${!isOnline ? 'disabled' : ''}>
-                                        ${isOnline ? 'View Data' : 'Offline'}
-                                    </button>
-                                    <span class="text-xs text-gray-500 text-center">
-                                        ${phone.connectedAt ? new Date(phone.connectedAt.toMillis()).toLocaleString() : 'Recently'}
-                                    </span>
-                                </div>
+                                <button onclick="window.selectPhone('${phone.ip}')" class="px-6 py-3 ${isOnline ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-300'} text-white rounded-lg transition-all font-bold" ${!isOnline ? 'disabled' : ''}>
+                                    ${isOnline ? 'View Database' : 'Offline'}
+                                </button>
                             </div>
                         `;
                         phonesList.appendChild(el);
                     });
                     
                     if (hasOnline) {
-                        document.getElementById('statusDisplay').textContent = 'Online';
-                        document.getElementById('statusDisplay').className = 'text-3xl font-bold text-green-600';
-                    } else {
-                        document.getElementById('statusDisplay').textContent = 'Offline';
-                        document.getElementById('statusDisplay').className = 'text-3xl font-bold text-gray-600';
+                        document.getElementById('overviewPhoneStatus').textContent = 'Online';
+                        document.getElementById('overviewPhoneStatus').className = 'badge badge-success';
                     }
                 }
-            }, (error) => {
-                console.error('Error loading phones:', error);
-                document.getElementById('phonesList').innerHTML = `
-                    <div class="col-span-full bg-red-50 p-6 rounded-lg border border-red-200">
-                        <p class="text-red-600">Error loading phones: ${error.message}</p>
-                        <p class="text-sm text-red-500 mt-2">Check console for details</p>
-                    </div>
-                `;
             });
         }
 
+        // Load APIs
+        function loadAPIs() {
+            const apisQuery = query(collection(db, 'apis'), where('userId', '==', currentUser.uid));
+            
+            onSnapshot(apisQuery, (snapshot) => {
+                const count = snapshot.size;
+                document.getElementById('apiLimitBadge').textContent = `${count}/2`;
+                document.getElementById('overviewApiCount').textContent = `${count} / 2`;
+                
+                const apisList = document.getElementById('apisList');
+                const createBtn = document.getElementById('createApiBtn');
+                
+                if (count >= 2) {
+                    createBtn.disabled = true;
+                    createBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    createBtn.disabled = false;
+                    createBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                
+                if (snapshot.empty) {
+                    apisList.innerHTML = `
+                        <div class="text-center py-24 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                            <svg class="h-20 w-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-600 mb-2">No APIs yet</p>
+                            <p class="text-sm text-gray-500 mb-4">Create your first API to get started</p>
+                            <button onclick="showCreateAPIModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium">
+                                Create Your First API
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    apisList.innerHTML = '';
+                    snapshot.forEach(docSnap => {
+                        const api = docSnap.data();
+                        const el = document.createElement('div');
+                        el.className = 'bg-white p-8 rounded-xl shadow-sm border-2 border-purple-100';
+                        el.innerHTML = `
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="text-2xl font-bold mb-2">${api.name}</h3>
+                                    <p class="text-gray-600">${api.description || 'No description'}</p>
+                                </div>
+                                <button onclick="window.deleteAPI('${docSnap.id}')" class="text-red-600 hover:text-red-700">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="mb-4">
+                                <span class="badge badge-${api.security === 'public' ? 'success' : api.security === 'password' ? 'warning' : 'info'}">
+                                    ${api.security === 'public' ? '🌐 Public' : api.security === 'password' ? '🔑 Password' : '🔒 Auth'}
+                                </span>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <div class="text-xs text-gray-500 mb-1">BASE URL</div>
+                                <div class="flex items-center gap-2">
+                                    <code class="flex-1 font-mono text-sm">https://domain.com/api/u/${currentUser.email.split('@')[0]}</code>
+                                    <button onclick="navigator.clipboard.writeText('https://domain.com/api/u/${currentUser.email.split('@')[0]}')" class="px-3 py-1 bg-purple-600 text-white rounded text-xs font-medium hover:bg-purple-700">
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Created ${api.createdAt ? new Date(api.createdAt.toMillis()).toLocaleDateString() : 'Recently'}
+                            </div>
+                        `;
+                        apisList.appendChild(el);
+                    });
+                }
+            });
+        }
+
+        // Database functions
         window.selectPhone = function(ip) {
-            if (!ip) {
-                alert('Invalid phone IP');
-                return;
-            }
             selectedPhone = ip;
             showSection('database');
             loadDatabaseFromPhone();
+            showToast('Loading database...', 'info');
         };
 
         async function loadDatabaseFromPhone() {
             if (!selectedPhone) {
-                alert('No phone selected');
+                showToast('No phone selected', 'error');
                 return;
             }
 
             try {
-                console.log('Loading database from:', selectedPhone);
                 const response = await fetch(`http://${selectedPhone}:8080/_snapshot`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                if (!response.ok) throw new Error('Failed to load');
                 
                 databaseData = await response.json();
-                console.log('Database loaded:', databaseData);
                 renderDatabase();
+                updateDatabaseStats();
+                showToast('Database loaded successfully', 'success');
             } catch (error) {
-                console.error('Load database error:', error);
+                console.error('Load error:', error);
                 document.getElementById('collectionsTree').innerHTML = `
                     <div class="text-red-600 text-sm p-4">
                         <p class="font-bold mb-2">Failed to load database</p>
                         <p class="text-xs">${error.message}</p>
-                        <p class="text-xs mt-2">Make sure:</p>
-                        <ul class="text-xs list-disc list-inside mt-1">
-                            <li>Phone is online</li>
-                            <li>Phone is on same network</li>
-                            <li>Port 8080 is accessible</li>
-                        </ul>
                     </div>
                 `;
+                showToast('Failed to load database', 'error');
             }
+        }
+
+        function updateDatabaseStats() {
+            const collections = Object.keys(databaseData);
+            let docCount = 0;
+            collections.forEach(c => {
+                docCount += Object.keys(databaseData[c] || {}).length;
+            });
+            
+            document.getElementById('overviewCollectionCount').textContent = collections.length;
+            document.getElementById('overviewDocCount').textContent = docCount;
         }
 
         function renderDatabase() {
@@ -440,58 +1133,65 @@
             tree.innerHTML = '';
 
             const collections = Object.keys(databaseData);
-            document.getElementById('collectionsCount').textContent = collections.length;
 
             if (collections.length === 0) {
-                tree.innerHTML = '<div class="text-gray-500 text-sm">Database is empty. Add a collection to get started.</div>';
-                document.getElementById('documentsCount').textContent = '0';
+                tree.innerHTML = `
+                    <div class="text-gray-500 text-sm text-center py-12">
+                        <svg class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <p class="mb-2">Database is empty</p>
+                        <button onclick="showAddCollectionModal()" class="text-purple-600 hover:text-purple-700 font-medium text-sm">
+                            + Add Collection
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
-            let totalDocs = 0;
             collections.forEach(collName => {
                 const docs = Object.keys(databaseData[collName] || {});
-                totalDocs += docs.length;
-
+                
                 const collDiv = document.createElement('div');
                 collDiv.className = 'mb-2';
                 
                 const collHeader = document.createElement('div');
-                collHeader.className = 'tree-item p-2 rounded flex items-center justify-between';
+                collHeader.className = 'tree-item p-3 rounded-lg flex items-center justify-between bg-purple-50';
                 collHeader.innerHTML = `
                     <div class="flex items-center gap-2 flex-1">
-                        <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                         </svg>
-                        <span class="font-medium">${collName}</span>
-                        <span class="text-xs text-gray-500">(${docs.length})</span>
+                        <span class="font-bold">${collName}</span>
+                        <span class="text-xs text-gray-500 bg-white px-2 py-0.5 rounded-full">${docs.length}</span>
                     </div>
+                    <button onclick="window.showAddDocumentModal('${collName}')" class="text-purple-600 hover:text-purple-700 text-xs font-medium">
+                        + Add
+                    </button>
                 `;
                 
                 const docsDiv = document.createElement('div');
-                docsDiv.className = 'tree-children mt-1';
+                docsDiv.className = 'tree-children mt-2';
                 docsDiv.style.display = 'none';
                 
                 docs.forEach(docId => {
                     const docDiv = document.createElement('div');
-                    docDiv.className = 'tree-item p-2 rounded text-sm hover:bg-blue-50';
+                    docDiv.className = 'tree-item p-2 rounded hover:bg-purple-50 cursor-pointer';
                     docDiv.innerHTML = `
-                        <div class="flex items-center gap-2 cursor-pointer">
-                            <svg class="h-3 w-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <span>${docId}</span>
+                            <span class="text-sm">${docId}</span>
                         </div>
                     `;
                     docDiv.onclick = () => showDocument(collName, docId);
                     docsDiv.appendChild(docDiv);
                 });
                 
-                collHeader.onclick = () => {
-                    if (docsDiv.style.display === 'none') {
-                        docsDiv.style.display = 'block';
-                    } else {
-                        docsDiv.style.display = 'none';
+                collHeader.onclick = (e) => {
+                    if (!e.target.closest('button')) {
+                        docsDiv.style.display = docsDiv.style.display === 'none' ? 'block' : 'none';
                     }
                 };
                 
@@ -499,8 +1199,6 @@
                 collDiv.appendChild(docsDiv);
                 tree.appendChild(collDiv);
             });
-
-            document.getElementById('documentsCount').textContent = totalDocs;
         }
 
         function showDocument(collName, docId) {
@@ -510,7 +1208,7 @@
             
             const content = document.getElementById('documentContent');
             content.innerHTML = `
-                <textarea id="docDataEditor" class="w-full h-96 p-4 border rounded font-mono text-sm focus:ring-2 focus:ring-blue-500">${JSON.stringify(docData, null, 2)}</textarea>
+                <textarea id="docDataEditor" class="w-full h-[500px] p-4 border-2 border-gray-300 rounded-lg font-mono text-sm focus:border-purple-500 focus:outline-none">${JSON.stringify(docData, null, 2)}</textarea>
             `;
 
             window.currentDocument = { collection: collName, id: docId };
@@ -531,10 +1229,10 @@
                 
                 if (!response.ok) throw new Error('Save failed');
                 
-                alert('✅ Document saved!');
+                showToast('Document saved successfully', 'success');
                 loadDatabaseFromPhone();
             } catch (error) {
-                alert('❌ Save failed: ' + error.message);
+                showToast('Failed to save: ' + error.message, 'error');
             }
         };
 
@@ -550,47 +1248,39 @@
                 
                 if (!response.ok) throw new Error('Delete failed');
                 
-                alert('✅ Document deleted!');
+                showToast('Document deleted successfully', 'success');
                 document.getElementById('documentActions').classList.add('hidden');
-                document.getElementById('documentContent').innerHTML = '<div class="text-center py-12 text-gray-500">Document deleted</div>';
+                document.getElementById('documentContent').innerHTML = `
+                    <div class="text-center py-24 text-gray-500">
+                        <p>Document deleted</p>
+                    </div>
+                `;
                 loadDatabaseFromPhone();
             } catch (error) {
-                alert('❌ Delete failed: ' + error.message);
+                showToast('Failed to delete: ' + error.message, 'error');
             }
         };
 
         window.refreshDatabase = loadDatabaseFromPhone;
-        
-        window.showConnectPhoneModal = function() {
-            document.getElementById('connectPhoneModal').classList.add('active');
-        };
-        
-        window.closeConnectPhoneModal = function() {
-            document.getElementById('connectPhoneModal').classList.remove('active');
-        };
-        
+
+        // Modal functions
         window.showAddCollectionModal = function() {
             if (!selectedPhone) {
-                alert('Please select a phone first');
+                showToast('Please select a phone first', 'error');
                 return;
             }
             document.getElementById('addCollectionModal').classList.add('active');
         };
-        
+
         window.closeAddCollectionModal = function() {
             document.getElementById('addCollectionModal').classList.remove('active');
             document.getElementById('collectionName').value = '';
         };
-        
+
         window.createCollection = async function() {
             const name = document.getElementById('collectionName').value.trim();
             if (!name) {
-                alert('Enter collection name');
-                return;
-            }
-            
-            if (!selectedPhone) {
-                alert('No phone selected');
+                showToast('Enter collection name', 'error');
                 return;
             }
             
@@ -601,34 +1291,182 @@
                     body: JSON.stringify({})
                 });
                 
-                if (!response.ok) throw new Error('Failed to create collection');
+                if (!response.ok) throw new Error('Failed');
                 
                 closeAddCollectionModal();
-                alert('✅ Collection created!');
+                showToast('Collection created successfully', 'success');
                 loadDatabaseFromPhone();
             } catch (error) {
-                alert('❌ Failed: ' + error.message);
+                showToast('Failed to create collection', 'error');
             }
         };
 
-        window.showSection = function(section) {
-            // Hide all sections
-            document.getElementById('overviewSection').classList.add('hidden');
-            document.getElementById('databaseSection').classList.add('hidden');
-            document.getElementById('phonesSection').classList.add('hidden');
+        window.showAddDocumentModal = function(collName) {
+            currentCollection = collName;
+            document.getElementById('addDocumentModal').classList.add('active');
+        };
+
+        window.closeAddDocumentModal = function() {
+            document.getElementById('addDocumentModal').classList.remove('active');
+            document.getElementById('documentId').value = '';
+            document.getElementById('documentData').value = '';
+        };
+
+        window.createDocument = async function() {
+            try {
+                const data = JSON.parse(document.getElementById('documentData').value || '{}');
+                const id = document.getElementById('documentId').value.trim() || Date.now().toString();
+                
+                const response = await fetch(`http://${selectedPhone}:8080/${currentCollection}/${id}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) throw new Error('Failed');
+                
+                closeAddDocumentModal();
+                showToast('Document created successfully', 'success');
+                loadDatabaseFromPhone();
+            } catch (error) {
+                showToast('Failed to create document: ' + error.message, 'error');
+            }
+        };
+
+        // API Modal
+        window.showCreateAPIModal = function() {
+            const count = document.querySelectorAll('#apisList > div').length;
+            if (count >= 2) {
+                showToast('Maximum 2 APIs per user', 'error');
+                return;
+            }
+            document.getElementById('createAPIModal').classList.add('active');
+        };
+
+        window.closeCreateAPIModal = function() {
+            document.getElementById('createAPIModal').classList.remove('active');
+        };
+
+        document.getElementById('apiSecurity').addEventListener('change', (e) => {
+            const passwordField = document.getElementById('apiPasswordField');
+            if (e.target.value === 'password') {
+                passwordField.classList.remove('hidden');
+            } else {
+                passwordField.classList.add('hidden');
+            }
+        });
+
+        window.createAPI = async function() {
+            const name = document.getElementById('apiName').value.trim();
+            const description = document.getElementById('apiDescription').value.trim();
+            const security = document.getElementById('apiSecurity').value;
+            const password = document.getElementById('apiPassword').value;
+
+            if (!name) {
+                showToast('Enter API name', 'error');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'apis'), {
+                    userId: currentUser.uid,
+                    name,
+                    description,
+                    security,
+                    password: security === 'password' ? password : null,
+                    createdAt: serverTimestamp()
+                });
+                
+                closeCreateAPIModal();
+                showToast('API created successfully', 'success');
+            } catch (error) {
+                showToast('Failed to create API', 'error');
+            }
+        };
+
+        window.deleteAPI = async function(id) {
+            if (!confirm('Delete this API?')) return;
             
-            // Show selected section
+            try {
+                await deleteDoc(doc(db, 'apis', id));
+                showToast('API deleted successfully', 'success');
+            } catch (error) {
+                showToast('Failed to delete API', 'error');
+            }
+        };
+
+        // Phone Modal
+        window.showConnectPhoneModal = function() {
+            document.getElementById('connectPhoneModal').classList.add('active');
+        };
+
+        window.closeConnectPhoneModal = function() {
+            document.getElementById('connectPhoneModal').classList.remove('active');
+        };
+
+        // Rules functions
+        window.loadRulesTemplate = function(type) {
+            const templates = {
+                public: `{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}`,
+                private: `{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}`,
+                auth: `{
+  "rules": {
+    "users/$userId": {
+      ".read": "$userId === auth.uid",
+      ".write": "$userId === auth.uid"
+    }
+  }
+}`
+            };
+            document.getElementById('rulesEditor').value = templates[type];
+        };
+
+        window.saveRules = async function() {
+            try {
+                const rules = document.getElementById('rulesEditor').value;
+                JSON.parse(rules); // Validate JSON
+                showToast('Rules validated and ready to publish', 'success');
+                // TODO: Send to phone
+            } catch (error) {
+                showToast('Invalid JSON syntax', 'error');
+            }
+        };
+
+        // Logs functions
+        window.refreshLogs = function() {
+            showToast('Logs refreshed', 'info');
+        };
+
+        window.clearLogs = function() {
+            if (confirm('Clear all logs?')) {
+                document.getElementById('logsTableBody').innerHTML = `
+                    <tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">No logs</td></tr>
+                `;
+                showToast('Logs cleared', 'info');
+            }
+        };
+
+        // Section navigation
+        window.showSection = function(section) {
+            document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(section + 'Section').classList.remove('hidden');
             
-            // Update nav
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navButton = document.getElementById('nav-' + section);
-            if (navButton) {
-                navButton.classList.add('active');
-            }
+            if (navButton) navButton.classList.add('active');
         };
 
-        // Export for window scope
+        // Export for global access
         window.db = db;
         window.auth = auth;
     </script>
@@ -637,6 +1475,11 @@
         function showDashboard() {
             document.getElementById('landingPage').classList.add('hidden');
             document.getElementById('dashboardPage').classList.remove('hidden');
+        }
+
+        function scrollToFeatures() {
+            // Placeholder for future features section
+            showDashboard();
         }
     </script>
 </body>
