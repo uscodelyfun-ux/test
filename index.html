@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Backend Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Landing Page -->
+    <div id="landingPage">
+        <!-- Header -->
+        <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="font-bold text-xl">Phone Backend</span>
+                </div>
+                <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Get Started
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="container mx-auto px-4 py-20 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">
+                Turn Your Old Phone Into a Backend Server
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                A free, beginner-friendly platform that lets you use your old Android phone as a backend - 
+                just like Firebase, but all your data stays on YOUR phone.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors text-lg font-medium">
+                    Start Building Free
+                </button>
+                <button class="border border-gray-300 px-8 py-3 rounded-md hover:bg-gray-50 transition-colors text-lg font-medium">
+                    Read Docs
+                </button>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="container mx-auto px-4 py-16">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <svg class="h-12 w-12 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    <h3 class="text-xl font-bold mb-2">100% Free Forever</h3>
+                    <p class="text-gray-600">
+                        No hidden costs, no credit cards. Perfect for students and beginners.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <svg class="h-12 w-12 text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                    </svg>
+                    <h3 class="text-xl font-bold mb-2">Your Data, Your Control</h3>
+                    <p class="text-gray-600">
+                        All data stays on YOUR phone, not on our servers.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <svg class="h-12 w-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    <h3 class="text-xl font-bold mb-2">Firebase-like Security</h3>
+                    <p class="text-gray-600">
+                        Write security rules just like Firebase.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t bg-gray-100 py-8 mt-16">
+            <div class="container mx-auto px-4 text-center text-sm text-gray-600">
+                <p>Built with ❤️ to help beginners learn backend development</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardPage" class="hidden">
+        <!-- Sign In Screen -->
+        <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+            <div class="max-w-md w-full mx-4">
+                <div class="bg-white p-8 rounded-lg shadow-lg border text-center">
+                    <svg class="h-16 w-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h1 class="text-2xl font-bold mb-2">Welcome to Phone Backend</h1>
+                    <p class="text-gray-600 mb-6">
+                        Sign in with Google to get started
+                    </p>
+                    <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                        Sign in with Google
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="hidden min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <div class="spinner mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="mainDashboard" class="hidden min-h-screen bg-gray-50">
+            <!-- Header -->
+            <header class="bg-white border-b">
+                <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="font-bold text-xl">Phone Backend</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <img id="userPhoto" src="" alt="User" class="w-8 h-8 rounded-full">
+                            <span id="userName" class="text-sm font-medium hidden md:block"></span>
+                        </div>
+                        <button onclick="signOut()" class="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span class="hidden md:inline">Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="container mx-auto px-4 py-8">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-lg mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Welcome, <span id="userFirstName"></span>! 👋</h1>
+                    <p class="text-blue-100">
+                        Your Phone Backend Platform is ready to use.
+                    </p>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">APIs</span>
+                            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold"><span id="apiCount">0</span> / 2</p>
+                        <p class="text-sm text-gray-500">APIs created</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">Phones</span>
+                            <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">0</p>
+                        <p class="text-sm text-gray-500">Connected devices</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">Requests</span>
+                            <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">0</p>
+                        <p class="text-sm text-gray-500">API requests today</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600">Rules</span>
+                            <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">0</p>
+                        <p class="text-sm text-gray-500">Security rules</p>
+                    </div>
+                </div>
+
+                <!-- My APIs Section -->
+                <div class="bg-white p-8 rounded-lg shadow-sm border mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold">My APIs</h2>
+                        <button onclick="showCreateAPIModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            + Create API
+                        </button>
+                    </div>
+                    <div id="apiList" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">No APIs yet. Create your first API to get started!</p>
+                    </div>
+                </div>
+
+                <!-- Getting Started -->
+                <div class="bg-white p-8 rounded-lg shadow-sm border">
+                    <h2 class="text-2xl font-bold mb-4">Getting Started</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                            <div>
+                                <h3 class="font-bold mb-1">Create Your First API</h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Click the "Create API" button above to set up your first endpoint
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-gray-400 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                            <div class="flex-1">
+                                <h3 class="font-bold mb-1">Connect Your Phone</h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Install CLI on old Android using Termux
+                                </p>
+                                <div class="bg-gray-800 text-green-400 p-3 rounded text-sm font-mono">
+                                    npm install -g phone-backend<br>
+                                    phone-backend login <span id="userUsername"></span><br>
+                                    phone-backend start
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-gray-400 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                            <div>
+                                <h3 class="font-bold mb-1">Start Building</h3>
+                                <p class="text-sm text-gray-600">
+                                    Use your API in any app or website
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create API Modal -->
+    <div id="createAPIModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">Create New API</h2>
+                <button onclick="closeCreateAPIModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form onsubmit="createAPI(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Name</label>
+                    <input type="text" id="apiName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="My Todo API">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="apiDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="A simple todo list API"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Security</label>
+                    <select id="apiSecurity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="public">Public (No authentication)</option>
+                        <option value="auth">Authenticated (Google sign-in required)</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeCreateAPIModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        Create API
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
+            authDomain: "harshitproto.firebaseapp.com",
+            projectId: "harshitproto",
+            storageBucket: "harshitproto.firebasestorage.app",
+            messagingSenderId: "805078252087",
+            appId: "1:805078252087:web:1ca3704d0e672906445db2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // Make functions globally available
+        window.signInWithGoogle = async function() {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Error signing in:', error);
+                alert('Failed to sign in: ' + error.message);
+            }
+        };
+
+        window.signOut = async function() {
+            try {
+                await firebaseSignOut(auth);
+                showSignIn();
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        };
+
+        window.createAPI = async function(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('apiName').value;
+            const description = document.getElementById('apiDescription').value;
+            const security = document.getElementById('apiSecurity').value;
+
+            try {
+                const apiData = {
+                    name,
+                    description,
+                    security,
+                    userId: currentUser.uid,
+                    username: currentUser.email.split('@')[0],
+                    createdAt: new Date().toISOString(),
+                    apiUrl: `https://routing-url.app/api/u/${currentUser.email.split('@')[0]}`
+                };
+
+                await addDoc(collection(db, 'apis'), apiData);
+                
+                closeCreateAPIModal();
+                loadAPIs();
+                
+                alert('API created successfully!');
+            } catch (error) {
+                console.error('Error creating API:', error);
+                alert('Failed to create API: ' + error.message);
+            }
+        };
+
+        window.deleteAPI = async function(apiId) {
+            if (!confirm('Are you sure you want to delete this API?')) return;
+            
+            try {
+                await deleteDoc(doc(db, 'apis', apiId));
+                loadAPIs();
+                alert('API deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting API:', error);
+                alert('Failed to delete API: ' + error.message);
+            }
+        };
+
+        async function loadAPIs() {
+            if (!currentUser) return;
+
+            try {
+                const q = query(collection(db, 'apis'), where('userId', '==', currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                
+                const apiList = document.getElementById('apiList');
+                const apiCount = document.getElementById('apiCount');
+                
+                if (querySnapshot.empty) {
+                    apiList.innerHTML = '<p class="text-gray-500 text-center py-8">No APIs yet. Create your first API to get started!</p>';
+                    apiCount.textContent = '0';
+                } else {
+                    apiCount.textContent = querySnapshot.size;
+                    apiList.innerHTML = '';
+                    
+                    querySnapshot.forEach((docSnapshot) => {
+                        const api = docSnapshot.data();
+                        const apiElement = document.createElement('div');
+                        apiElement.className = 'border rounded-lg p-4';
+                        apiElement.innerHTML = `
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg mb-1">${api.name}</h3>
+                                    <p class="text-sm text-gray-600 mb-2">${api.description || 'No description'}</p>
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <span class="px-2 py-1 bg-${api.security === 'public' ? 'green' : 'blue'}-100 text-${api.security === 'public' ? 'green' : 'blue'}-800 rounded">
+                                            ${api.security === 'public' ? 'Public' : 'Authenticated'}
+                                        </span>
+                                        <span class="text-gray-500">Created ${new Date(api.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="mt-3 p-2 bg-gray-100 rounded text-xs font-mono break-all">
+                                        ${api.apiUrl}
+                                    </div>
+                                </div>
+                                <button onclick="deleteAPI('${docSnapshot.id}')" class="ml-4 text-red-600 hover:text-red-800">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        apiList.appendChild(apiElement);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading APIs:', error);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                showMainDashboard(user);
+                loadAPIs();
+            } else {
+                currentUser = null;
+                showSignIn();
+            }
+        });
+
+        function showSignIn() {
+            document.getElementById('signInScreen').classList.remove('hidden');
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.add('hidden');
+        }
+
+        function showMainDashboard(user) {
+            document.getElementById('signInScreen').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            
+            document.getElementById('userName').textContent = user.displayName || 'User';
+            document.getElementById('userFirstName').textContent = (user.displayName || 'Developer').split(' ')[0];
+            document.getElementById('userPhoto').src = user.photoURL || 'https://via.placeholder.com/32';
+            document.getElementById('userUsername').textContent = user.email.split('@')[0];
+        }
+    </script>
+
+    <script>
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+        }
+
+        function showLanding() {
+            document.getElementById('landingPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
+
+        function showCreateAPIModal() {
+            document.getElementById('createAPIModal').classList.add('active');
+        }
+
+        function closeCreateAPIModal() {
+            document.getElementById('createAPIModal').classList.remove('active');
+            document.getElementById('apiName').value = '';
+            document.getElementById('apiDescription').value = '';
+        }
+    </script>
+</body>
+</html>
