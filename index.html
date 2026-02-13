@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Backend - Firebase-like Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -32,7 +31,7 @@
         .tree-item { cursor: pointer; user-select: none; }
         .tree-item:hover { background-color: #f3f4f6; }
         .tree-children { margin-left: 1.5rem; }
-        .json-editor { height: 400px; border: 1px solid #e5e7eb; }
+        .nav-item.active { background-color: #1f2937 !important; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -76,7 +75,6 @@
 
         <!-- Main Dashboard -->
         <div id="mainDashboard" class="hidden">
-            <!-- Sidebar Navigation -->
             <div class="flex h-screen">
                 <!-- Sidebar -->
                 <div class="w-64 bg-gray-900 text-white flex flex-col">
@@ -90,21 +88,17 @@
                     </div>
 
                     <nav class="flex-1 p-4 space-y-1">
-                        <button onclick="showSection('overview')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
+                        <button onclick="showSection('overview')" id="nav-overview" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                             Overview
                         </button>
-                        <button onclick="showSection('database')" class="nav-item w-full text-left px-4 py-2 rounded bg-gray-800 flex items-center gap-3">
+                        <button onclick="showSection('database')" id="nav-database" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
                             Database
                         </button>
-                        <button onclick="showSection('phones')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
+                        <button onclick="showSection('phones')" id="nav-phones" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                             Phones <span id="phonesBadge" class="ml-auto bg-green-600 px-2 py-0.5 rounded text-xs">0</span>
-                        </button>
-                        <button onclick="showSection('rules')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                            Rules
                         </button>
                     </nav>
 
@@ -138,35 +132,8 @@
                                 <div class="text-3xl font-bold" id="phonesCount">0</div>
                             </div>
                             <div class="bg-white p-6 rounded-lg shadow-sm border">
-                                <div class="text-gray-600 mb-2">Requests</div>
-                                <div class="text-3xl font-bold">0</div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white p-6 rounded-lg shadow-sm border">
-                            <h2 class="text-xl font-bold mb-4">Quick Start</h2>
-                            <div class="space-y-3">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">1</div>
-                                    <div>
-                                        <div class="font-medium">Connect Your Phone</div>
-                                        <div class="text-sm text-gray-600">Install app on old Android phone</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">2</div>
-                                    <div>
-                                        <div class="font-medium">Create Collections</div>
-                                        <div class="text-sm text-gray-600">Organize your data like Firebase</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">3</div>
-                                    <div>
-                                        <div class="font-medium">Build Your App</div>
-                                        <div class="text-sm text-gray-600">Use REST API or SDKs</div>
-                                    </div>
-                                </div>
+                                <div class="text-gray-600 mb-2">Status</div>
+                                <div class="text-3xl font-bold" id="statusDisplay">Offline</div>
                             </div>
                         </div>
                     </div>
@@ -185,17 +152,15 @@
                         </div>
 
                         <div class="grid grid-cols-12 gap-6">
-                            <!-- Collections Tree -->
                             <div class="col-span-4 bg-white rounded-lg shadow-sm border">
                                 <div class="p-4 border-b">
                                     <h2 class="font-bold">Collections</h2>
                                 </div>
                                 <div id="collectionsTree" class="p-4 space-y-1">
-                                    <div class="text-gray-500 text-sm">No collections yet. Click "+ Add Collection" to start.</div>
+                                    <div class="text-gray-500 text-sm">No phone selected. Go to Phones section and click "View Data"</div>
                                 </div>
                             </div>
 
-                            <!-- Document View/Edit -->
                             <div class="col-span-8 bg-white rounded-lg shadow-sm border">
                                 <div class="p-4 border-b flex items-center justify-between">
                                     <h2 class="font-bold" id="documentTitle">Select a document</h2>
@@ -209,7 +174,7 @@
                                         <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
-                                        <p>Select a collection or document to view</p>
+                                        <p>Select a phone and collection to view data</p>
                                     </div>
                                 </div>
                             </div>
@@ -222,46 +187,13 @@
                             <h1 class="text-3xl font-bold">Connected Phones</h1>
                             <button onclick="showConnectPhoneModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">+ Connect Phone</button>
                         </div>
-                        <div id="phonesList" class="grid gap-4"></div>
-                    </div>
-
-                    <!-- Rules Section -->
-                    <div id="rulesSection" class="hidden p-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h1 class="text-3xl font-bold">Security Rules</h1>
-                            <button onclick="saveRules()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Publish Rules</button>
-                        </div>
-                        <div class="bg-white rounded-lg shadow-sm border">
-                            <div class="json-editor" id="rulesEditor"></div>
+                        <div id="phonesList" class="grid gap-4">
+                            <div class="text-center py-12 text-gray-500">
+                                <p>Loading phones...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <!-- Add Collection Modal -->
-    <div id="addCollectionModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 class="text-2xl font-bold mb-4">Add Collection</h2>
-            <input type="text" id="collectionName" placeholder="Collection name (e.g., users)" class="w-full px-3 py-2 border rounded-md mb-4">
-            <div class="flex gap-3">
-                <button onclick="closeAddCollectionModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
-                <button onclick="createCollection()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Document Modal -->
-    <div id="addDocumentModal" class="modal">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h2 class="text-2xl font-bold mb-4">Add Document</h2>
-            <input type="text" id="documentId" placeholder="Document ID (auto if empty)" class="w-full px-3 py-2 border rounded-md mb-4">
-            <textarea id="documentData" placeholder='{"field": "value"}' class="w-full px-3 py-2 border rounded-md mb-4" rows="6"></textarea>
-            <div class="flex gap-3">
-                <button onclick="closeAddDocumentModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
-                <button onclick="createDocument()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
             </div>
         </div>
     </div>
@@ -275,19 +207,37 @@
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm mb-4">
-                wget https://your-url.com/connect.js<br>
-                node connect.js <span id="modalUserEmail"></span>
+            <div class="space-y-4">
+                <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm">
+                    <div class="mb-2 text-gray-400"># Step 1: Install Node.js (if not installed)</div>
+                    pkg update && pkg install nodejs -y<br><br>
+                    <div class="mb-2 text-gray-400"># Step 2: Download connector</div>
+                    wget https://your-url.com/connect.js<br><br>
+                    <div class="mb-2 text-gray-400"># Step 3: Connect!</div>
+                    node connect.js <span id="modalUserEmail"></span>
+                </div>
+                <p class="text-sm text-gray-600">Run these commands in Termux on your Android phone. Your phone will appear in the list once connected.</p>
             </div>
-            <p class="text-sm text-gray-600">Run these commands in Termux on your Android phone</p>
         </div>
     </div>
 
-    <!-- Firebase SDK & App Logic -->
+    <!-- Add Collection Modal -->
+    <div id="addCollectionModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 class="text-2xl font-bold mb-4">Add Collection</h2>
+            <input type="text" id="collectionName" placeholder="Collection name (e.g., users)" class="w-full px-3 py-2 border rounded-md mb-4">
+            <div class="flex gap-3">
+                <button onclick="closeAddCollectionModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
+                <button onclick="createCollection()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-        import { getFirestore, collection, query, where, getDocs, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+        import { getFirestore, collection, query, where, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
@@ -305,26 +255,31 @@
         let currentUser = null;
         let selectedPhone = null;
         let databaseData = {};
-        let rulesEditor = null;
 
         window.signInWithGoogle = async function() {
             try {
                 await signInWithPopup(auth, new GoogleAuthProvider());
             } catch (error) {
+                console.error('Sign in error:', error);
                 alert('Sign in failed: ' + error.message);
             }
         };
 
         window.signOut = async function() {
-            await firebaseSignOut(auth);
+            try {
+                await firebaseSignOut(auth);
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 showMainDashboard();
-                loadData();
+                loadPhones();
             } else {
+                currentUser = null;
                 document.getElementById('signInScreen').classList.remove('hidden');
                 document.getElementById('mainDashboard').classList.add('hidden');
             }
@@ -333,52 +288,114 @@
         function showMainDashboard() {
             document.getElementById('signInScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
-            document.getElementById('sidebarUserName').textContent = currentUser.displayName;
-            document.getElementById('sidebarUserPhoto').src = currentUser.photoURL;
+            document.getElementById('sidebarUserName').textContent = currentUser.displayName || 'User';
+            document.getElementById('sidebarUserPhoto').src = currentUser.photoURL || '';
             document.getElementById('modalUserEmail').textContent = currentUser.email;
-            showSection('database');
+            showSection('phones');
         }
 
-        async function loadData() {
-            // Load phones
-            const phonesQuery = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
+        function loadPhones() {
+            console.log('Loading phones for user:', currentUser.email);
+            
+            const phonesQuery = query(
+                collection(db, 'phones'), 
+                where('userId', '==', currentUser.email)
+            );
+            
             onSnapshot(phonesQuery, (snapshot) => {
+                console.log('Phones snapshot received:', snapshot.size, 'phones');
+                
                 const count = snapshot.size;
                 document.getElementById('phonesBadge').textContent = count;
                 document.getElementById('phonesCount').textContent = count;
                 
                 const phonesList = document.getElementById('phonesList');
+                
                 if (snapshot.empty) {
-                    phonesList.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No phones connected</div>';
+                    phonesList.innerHTML = `
+                        <div class="col-span-full bg-white p-12 rounded-lg shadow-sm border text-center">
+                            <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <h3 class="text-lg font-bold mb-2 text-gray-700">No Phones Connected</h3>
+                            <p class="text-gray-500 mb-4">Connect your Android phone to get started</p>
+                            <button onclick="showConnectPhoneModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                + Connect Phone
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('statusDisplay').textContent = 'Offline';
+                    document.getElementById('statusDisplay').className = 'text-3xl font-bold text-red-600';
                 } else {
                     phonesList.innerHTML = '';
+                    let hasOnline = false;
+                    
                     snapshot.forEach(docSnap => {
                         const phone = docSnap.data();
+                        console.log('Phone data:', phone);
+                        
                         const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
+                        if (isOnline) hasOnline = true;
                         
                         const el = document.createElement('div');
-                        el.className = 'bg-white p-4 rounded-lg shadow-sm border';
+                        el.className = 'bg-white p-6 rounded-lg shadow-sm border ' + (isOnline ? 'border-green-200' : '');
                         el.innerHTML = `
                             <div class="flex items-center justify-between">
-                                <div>
-                                    <h3 class="font-bold">${phone.deviceName || 'Phone'}</h3>
-                                    <p class="text-sm text-gray-600">${phone.model || 'Unknown'}</p>
-                                    <span class="text-xs ${isOnline ? 'text-green-600' : 'text-gray-500'}">
-                                        ${isOnline ? '● Online' : '○ Offline'}
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 ${isOnline ? 'bg-green-100' : 'bg-gray-100'} rounded-full flex items-center justify-center">
+                                        <svg class="h-6 w-6 ${isOnline ? 'text-green-600' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">${phone.deviceName || 'Android Phone'}</h3>
+                                        <p class="text-sm text-gray-600">${phone.model || 'Unknown Model'}</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="flex items-center gap-1 text-sm">
+                                                <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'} ${isOnline ? 'pulse' : ''}"></span>
+                                                <span class="${isOnline ? 'text-green-600' : 'text-gray-500'} font-medium">${isOnline ? 'Online' : 'Offline'}</span>
+                                            </span>
+                                            ${phone.ip ? `<span class="text-xs text-gray-500">• ${phone.ip}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="window.selectPhone('${phone.ip}')" class="px-4 py-2 ${isOnline ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400'} text-white rounded-md text-sm" ${!isOnline ? 'disabled' : ''}>
+                                        ${isOnline ? 'View Data' : 'Offline'}
+                                    </button>
+                                    <span class="text-xs text-gray-500 text-center">
+                                        ${phone.connectedAt ? new Date(phone.connectedAt.toMillis()).toLocaleString() : 'Recently'}
                                     </span>
                                 </div>
-                                <button onclick="selectPhone('${phone.ip}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
-                                    View Data
-                                </button>
                             </div>
                         `;
                         phonesList.appendChild(el);
                     });
+                    
+                    if (hasOnline) {
+                        document.getElementById('statusDisplay').textContent = 'Online';
+                        document.getElementById('statusDisplay').className = 'text-3xl font-bold text-green-600';
+                    } else {
+                        document.getElementById('statusDisplay').textContent = 'Offline';
+                        document.getElementById('statusDisplay').className = 'text-3xl font-bold text-gray-600';
+                    }
                 }
+            }, (error) => {
+                console.error('Error loading phones:', error);
+                document.getElementById('phonesList').innerHTML = `
+                    <div class="col-span-full bg-red-50 p-6 rounded-lg border border-red-200">
+                        <p class="text-red-600">Error loading phones: ${error.message}</p>
+                        <p class="text-sm text-red-500 mt-2">Check console for details</p>
+                    </div>
+                `;
             });
         }
 
         window.selectPhone = function(ip) {
+            if (!ip) {
+                alert('Invalid phone IP');
+                return;
+            }
             selectedPhone = ip;
             showSection('database');
             loadDatabaseFromPhone();
@@ -386,16 +403,35 @@
 
         async function loadDatabaseFromPhone() {
             if (!selectedPhone) {
-                alert('Please select a phone first');
+                alert('No phone selected');
                 return;
             }
 
             try {
+                console.log('Loading database from:', selectedPhone);
                 const response = await fetch(`http://${selectedPhone}:8080/_snapshot`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 databaseData = await response.json();
+                console.log('Database loaded:', databaseData);
                 renderDatabase();
             } catch (error) {
-                alert('Failed to load database: ' + error.message);
+                console.error('Load database error:', error);
+                document.getElementById('collectionsTree').innerHTML = `
+                    <div class="text-red-600 text-sm p-4">
+                        <p class="font-bold mb-2">Failed to load database</p>
+                        <p class="text-xs">${error.message}</p>
+                        <p class="text-xs mt-2">Make sure:</p>
+                        <ul class="text-xs list-disc list-inside mt-1">
+                            <li>Phone is online</li>
+                            <li>Phone is on same network</li>
+                            <li>Port 8080 is accessible</li>
+                        </ul>
+                    </div>
+                `;
             }
         }
 
@@ -406,73 +442,65 @@
             const collections = Object.keys(databaseData);
             document.getElementById('collectionsCount').textContent = collections.length;
 
+            if (collections.length === 0) {
+                tree.innerHTML = '<div class="text-gray-500 text-sm">Database is empty. Add a collection to get started.</div>';
+                document.getElementById('documentsCount').textContent = '0';
+                return;
+            }
+
             let totalDocs = 0;
             collections.forEach(collName => {
                 const docs = Object.keys(databaseData[collName] || {});
                 totalDocs += docs.length;
 
                 const collDiv = document.createElement('div');
-                collDiv.className = 'tree-item p-2 rounded';
-                collDiv.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                collDiv.className = 'mb-2';
+                
+                const collHeader = document.createElement('div');
+                collHeader.className = 'tree-item p-2 rounded flex items-center justify-between';
+                collHeader.innerHTML = `
+                    <div class="flex items-center gap-2 flex-1">
+                        <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                         </svg>
                         <span class="font-medium">${collName}</span>
                         <span class="text-xs text-gray-500">(${docs.length})</span>
                     </div>
                 `;
-                collDiv.onclick = () => showCollection(collName);
-                tree.appendChild(collDiv);
-
+                
                 const docsDiv = document.createElement('div');
-                docsDiv.className = 'tree-children hidden';
+                docsDiv.className = 'tree-children mt-1';
+                docsDiv.style.display = 'none';
+                
                 docs.forEach(docId => {
                     const docDiv = document.createElement('div');
-                    docDiv.className = 'tree-item p-2 rounded text-sm';
+                    docDiv.className = 'tree-item p-2 rounded text-sm hover:bg-blue-50';
                     docDiv.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center gap-2 cursor-pointer">
+                            <svg class="h-3 w-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <span>${docId}</span>
                         </div>
                     `;
-                    docDiv.onclick = (e) => {
-                        e.stopPropagation();
-                        showDocument(collName, docId);
-                    };
+                    docDiv.onclick = () => showDocument(collName, docId);
                     docsDiv.appendChild(docDiv);
                 });
-                tree.appendChild(docsDiv);
-
-                collDiv.onclick = () => {
-                    docsDiv.classList.toggle('hidden');
+                
+                collHeader.onclick = () => {
+                    if (docsDiv.style.display === 'none') {
+                        docsDiv.style.display = 'block';
+                    } else {
+                        docsDiv.style.display = 'none';
+                    }
                 };
+                
+                collDiv.appendChild(collHeader);
+                collDiv.appendChild(docsDiv);
+                tree.appendChild(collDiv);
             });
 
             document.getElementById('documentsCount').textContent = totalDocs;
-        }
-
-        function showCollection(collName) {
-            const docs = databaseData[collName] || {};
-            const content = document.getElementById('documentContent');
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold">Collection: ${collName}</h3>
-                        <button onclick="showAddDocumentModal('${collName}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">+ Add Document</button>
-                    </div>
-                    <div class="space-y-2">
-                        ${Object.keys(docs).map(docId => `
-                            <div class="p-3 border rounded hover:bg-gray-50 cursor-pointer" onclick="showDocument('${collName}', '${docId}')">
-                                <div class="font-medium">${docId}</div>
-                                <div class="text-xs text-gray-500">${Object.keys(docs[docId]).length} fields</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
         }
 
         function showDocument(collName, docId) {
@@ -482,7 +510,7 @@
             
             const content = document.getElementById('documentContent');
             content.innerHTML = `
-                <textarea id="docDataEditor" class="w-full h-96 p-4 border rounded font-mono text-sm">${JSON.stringify(docData, null, 2)}</textarea>
+                <textarea id="docDataEditor" class="w-full h-96 p-4 border rounded font-mono text-sm focus:ring-2 focus:ring-blue-500">${JSON.stringify(docData, null, 2)}</textarea>
             `;
 
             window.currentDocument = { collection: collName, id: docId };
@@ -495,16 +523,18 @@
                 const newData = JSON.parse(document.getElementById('docDataEditor').value);
                 const {collection, id} = window.currentDocument;
                 
-                await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {
+                const response = await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {
                     method: 'PATCH',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(newData)
                 });
                 
-                alert('Document saved!');
+                if (!response.ok) throw new Error('Save failed');
+                
+                alert('✅ Document saved!');
                 loadDatabaseFromPhone();
             } catch (error) {
-                alert('Save failed: ' + error.message);
+                alert('❌ Save failed: ' + error.message);
             }
         };
 
@@ -514,50 +544,93 @@
             
             try {
                 const {collection, id} = window.currentDocument;
-                await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {method: 'DELETE'});
-                alert('Document deleted!');
+                const response = await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Delete failed');
+                
+                alert('✅ Document deleted!');
+                document.getElementById('documentActions').classList.add('hidden');
+                document.getElementById('documentContent').innerHTML = '<div class="text-center py-12 text-gray-500">Document deleted</div>';
                 loadDatabaseFromPhone();
             } catch (error) {
-                alert('Delete failed: ' + error.message);
-            }
-        };
-
-        window.showAddCollectionModal = function() {
-            document.getElementById('addCollectionModal').classList.add('active');
-        };
-
-        window.closeAddCollectionModal = function() {
-            document.getElementById('addCollectionModal').classList.remove('active');
-        };
-
-        window.createCollection = async function() {
-            const name = document.getElementById('collectionName').value.trim();
-            if (!name) return alert('Enter collection name');
-            
-            try {
-                await fetch(`http://${selectedPhone}:8080/${name}/_init`, {method: 'POST'});
-                closeAddCollectionModal();
-                loadDatabaseFromPhone();
-            } catch (error) {
-                alert('Failed: ' + error.message);
+                alert('❌ Delete failed: ' + error.message);
             }
         };
 
         window.refreshDatabase = loadDatabaseFromPhone;
+        
         window.showConnectPhoneModal = function() {
             document.getElementById('connectPhoneModal').classList.add('active');
         };
+        
         window.closeConnectPhoneModal = function() {
             document.getElementById('connectPhoneModal').classList.remove('active');
         };
+        
+        window.showAddCollectionModal = function() {
+            if (!selectedPhone) {
+                alert('Please select a phone first');
+                return;
+            }
+            document.getElementById('addCollectionModal').classList.add('active');
+        };
+        
+        window.closeAddCollectionModal = function() {
+            document.getElementById('addCollectionModal').classList.remove('active');
+            document.getElementById('collectionName').value = '';
+        };
+        
+        window.createCollection = async function() {
+            const name = document.getElementById('collectionName').value.trim();
+            if (!name) {
+                alert('Enter collection name');
+                return;
+            }
+            
+            if (!selectedPhone) {
+                alert('No phone selected');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://${selectedPhone}:8080/${name}/_init`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) throw new Error('Failed to create collection');
+                
+                closeAddCollectionModal();
+                alert('✅ Collection created!');
+                loadDatabaseFromPhone();
+            } catch (error) {
+                alert('❌ Failed: ' + error.message);
+            }
+        };
 
         window.showSection = function(section) {
-            document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+            // Hide all sections
+            document.getElementById('overviewSection').classList.add('hidden');
+            document.getElementById('databaseSection').classList.add('hidden');
+            document.getElementById('phonesSection').classList.add('hidden');
+            
+            // Show selected section
             document.getElementById(section + 'Section').classList.remove('hidden');
             
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('bg-gray-800'));
-            event?.target.closest('.nav-item')?.classList.add('bg-gray-800');
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navButton = document.getElementById('nav-' + section);
+            if (navButton) {
+                navButton.classList.add('active');
+            }
         };
+
+        // Export for window scope
+        window.db = db;
+        window.auth = auth;
     </script>
 
     <script>
