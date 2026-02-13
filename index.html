@@ -339,7 +339,7 @@
                     name,
                     description,
                     security,
-                    userId: currentUser.uid,
+                    userId: currentUser.email,
                     username: currentUser.email.split('@')[0],
                     createdAt: serverTimestamp()
                 });
@@ -356,7 +356,7 @@
         async function loadAPIs() {
             if (!currentUser) return;
             try {
-                const q = query(collection(db, 'apis'), where('userId', '==', currentUser.uid));
+                const q = query(collection(db, 'apis'), where('userId', '==', currentUser.email));
                 const snapshot = await getDocs(q);
                 const apiList = document.getElementById('apiList');
                 const apiCount = document.getElementById('apiCount');
@@ -398,7 +398,7 @@
         function startListeningToPhones() {
             if (!currentUser) return;
             
-            const q = query(collection(db, 'phones'), where('userId', '==', currentUser.uid));
+            const q = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
             phonesListener = onSnapshot(q, (snapshot) => {
                 const phoneList = document.getElementById('phoneList');
                 const phoneCount = document.getElementById('phoneCount');
