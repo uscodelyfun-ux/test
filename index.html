@@ -3,1008 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phone Backend Platform</title>
+    <title>Phone Backend - Firebase-like Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .gradient-text { background: linear-gradient(to right, #2563eb, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
-        .modal.active { display:flex; }
-        .pulse { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-        .tab-btn { background:#f3f4f6; color:#4b5563; transition:all 0.15s; cursor:pointer; }
-        .tab-btn:hover { background:#e5e7eb; }
-        .tab-btn.active { background:#2563eb !important; color:white !important; }
-        .db-row:hover { background:#f8fafc; }
-        .sidebar-item { cursor:pointer; border-radius:8px; padding:8px 12px; transition:background 0.15s; }
-        .sidebar-item:hover { background:#e0e7ff; }
-        .sidebar-item.active { background:#2563eb; color:white; }
-        .sidebar-item.active .coll-count { background:rgba(255,255,255,0.25); color:white; }
-        .json-key { color:#7c3aed; }
-        .json-str { color:#059669; }
-        .json-num { color:#2563eb; }
-        .json-bool { color:#dc2626; }
-        pre { white-space: pre-wrap; word-break: break-all; }
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .tree-item { cursor: pointer; user-select: none; }
+        .tree-item:hover { background-color: #f3f4f6; }
+        .tree-children { margin-left: 1.5rem; }
+        .json-editor { height: 400px; border: 1px solid #e5e7eb; }
     </style>
 </head>
 <body class="bg-gray-50">
-
-<!-- Landing Page -->
-<div id="landingPage">
-    <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">📱</span>
-                <span class="font-bold text-xl">Phone Backend</span>
-            </div>
-            <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Get Started</button>
-        </div>
-    </header>
-    <section class="container mx-auto px-4 py-20 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">Turn Your Old Phone Into a Backend Server</h1>
-        <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">A free Firebase-like platform. All data stored on YOUR phone. Create collections, add documents, manage everything from the dashboard.</p>
-        <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 text-lg font-medium">Start Building Free →</button>
-    </section>
-</div>
-
-<!-- Dashboard -->
-<div id="dashboardPage" class="hidden">
-    <!-- Sign In -->
-    <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
-        <div class="max-w-md w-full mx-4">
-            <div class="bg-white p-8 rounded-xl shadow-lg border text-center">
-                <div class="text-5xl mb-4">📱</div>
-                <h1 class="text-2xl font-bold mb-2">Phone Backend</h1>
-                <p class="text-gray-600 mb-6">Sign in to manage your phone database</p>
-                <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">Sign in with Google</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Dashboard -->
-    <div id="mainDashboard" class="hidden min-h-screen bg-gray-50">
-        <header class="bg-white border-b sticky top-0 z-40">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+    <!-- Landing Page -->
+    <div id="landingPage">
+        <header class="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">📱</span>
-                    <span class="font-bold text-lg">Phone Backend</span>
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="font-bold text-xl">Phone Backend</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <img id="userPhoto" src="" alt="" class="w-8 h-8 rounded-full">
-                    <span id="userName" class="text-sm font-medium hidden md:block"></span>
-                    <button onclick="signOut()" class="text-sm text-gray-500 hover:text-gray-800 border px-3 py-1 rounded-lg">Sign Out</button>
-                </div>
+                <button onclick="showDashboard()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Get Started</button>
             </div>
         </header>
+        <section class="container mx-auto px-4 py-20 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">Firebase-like Backend on Your Phone</h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Full database viewer, collections, documents, and real-time sync - just like Firebase!
+            </p>
+            <button onclick="showDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 text-lg font-medium">Start Building Free</button>
+        </section>
+    </div>
 
-        <!-- Tab nav -->
-        <div class="bg-white border-b">
-            <div class="container mx-auto px-4">
-                <div class="flex gap-1">
-                    <button onclick="switchMainTab('overview')" id="tab-overview" class="main-tab px-4 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600">📊 Overview</button>
-                    <button onclick="switchMainTab('database')" id="tab-database" class="main-tab px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800">🗄️ Database</button>
-                    <button onclick="switchMainTab('apis')" id="tab-apis" class="main-tab px-4 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800">⚡ APIs</button>
+    <!-- Dashboard -->
+    <div id="dashboardPage" class="hidden">
+        <!-- Sign In -->
+        <div id="signInScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+            <div class="max-w-md w-full mx-4">
+                <div class="bg-white p-8 rounded-lg shadow-lg border text-center">
+                    <svg class="h-16 w-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <h1 class="text-2xl font-bold mb-2">Welcome to Phone Backend</h1>
+                    <p class="text-gray-600 mb-6">Sign in with Google to get started</p>
+                    <button onclick="signInWithGoogle()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium">Sign in with Google</button>
                 </div>
             </div>
         </div>
 
-        <div class="container mx-auto px-4 py-6">
-
-            <!-- ===== OVERVIEW TAB ===== -->
-            <div id="view-overview">
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-xl mb-6">
-                    <h1 class="text-2xl font-bold mb-1">Welcome, <span id="userFirstName"></span>! 👋</h1>
-                    <p class="text-blue-100 text-sm">Your Phone Backend Platform is ready.</p>
-                </div>
-                <div class="grid md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border">
-                        <p class="text-xs text-gray-500 mb-1">Collections</p>
-                        <p class="text-3xl font-bold" id="statCollections">0</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border">
-                        <p class="text-xs text-gray-500 mb-1">Documents</p>
-                        <p class="text-3xl font-bold" id="statDocuments">0</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border">
-                        <p class="text-xs text-gray-500 mb-1">Connected Phones</p>
-                        <p class="text-3xl font-bold" id="phoneCount">0</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border">
-                        <p class="text-xs text-gray-500 mb-1">Status</p>
-                        <p class="text-2xl font-bold text-red-500" id="overallStatus">Offline</p>
-                    </div>
-                </div>
-                <!-- Connected Phones -->
-                <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-bold">Connected Phones</h2>
-                        <button onclick="showConnectPhoneModal()" class="bg-green-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-green-700">+ Connect Phone</button>
-                    </div>
-                    <div id="phoneList">
-                        <p class="text-gray-400 text-sm text-center py-6">No phones connected yet</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ===== DATABASE TAB ===== -->
-            <div id="view-database" class="hidden">
-                <!-- Phone selector -->
-                <div class="bg-white rounded-xl border shadow-sm p-4 mb-4 flex items-center gap-3 flex-wrap">
-                    <span class="text-sm font-medium text-gray-600">📡 Connected to phone:</span>
-                    <select id="phoneSelector" onchange="onPhoneSelected()" class="text-sm border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">— Select a phone —</option>
-                    </select>
-                    <span id="phoneStatusDot" class="text-xs text-gray-400">No phone selected</span>
-                    <button onclick="refreshDatabase()" class="ml-auto text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg">🔄 Refresh</button>
-                </div>
-
-                <!-- 3-column layout like Firebase -->
-                <div class="flex gap-3 h-[70vh]">
-
-                    <!-- Column 1: Collections -->
-                    <div class="w-56 shrink-0 bg-white rounded-xl border shadow-sm flex flex-col">
-                        <div class="flex items-center justify-between p-3 border-b">
-                            <span class="text-sm font-bold text-gray-700">Collections</span>
-                            <button onclick="showCreateCollectionModal()" class="text-blue-600 hover:bg-blue-50 rounded p-1 text-lg leading-none" title="New Collection">+</button>
-                        </div>
-                        <div id="collectionList" class="overflow-y-auto flex-1 p-2">
-                            <p class="text-xs text-gray-400 text-center py-4">No collections yet</p>
+        <!-- Main Dashboard -->
+        <div id="mainDashboard" class="hidden">
+            <!-- Sidebar Navigation -->
+            <div class="flex h-screen">
+                <!-- Sidebar -->
+                <div class="w-64 bg-gray-900 text-white flex flex-col">
+                    <div class="p-4 border-b border-gray-700">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="font-bold">Phone Backend</span>
                         </div>
                     </div>
 
-                    <!-- Column 2: Documents -->
-                    <div class="w-64 shrink-0 bg-white rounded-xl border shadow-sm flex flex-col">
-                        <div class="flex items-center justify-between p-3 border-b">
-                            <span class="text-sm font-bold text-gray-700" id="docListTitle">Documents</span>
-                            <button onclick="showAddDocumentModal()" id="addDocBtn" class="text-blue-600 hover:bg-blue-50 rounded p-1 text-lg leading-none hidden" title="Add Document">+</button>
-                        </div>
-                        <div id="documentList" class="overflow-y-auto flex-1 p-2">
-                            <p class="text-xs text-gray-400 text-center py-4">Select a collection</p>
-                        </div>
-                    </div>
+                    <nav class="flex-1 p-4 space-y-1">
+                        <button onclick="showSection('overview')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            Overview
+                        </button>
+                        <button onclick="showSection('database')" class="nav-item w-full text-left px-4 py-2 rounded bg-gray-800 flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+                            Database
+                        </button>
+                        <button onclick="showSection('phones')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            Phones <span id="phonesBadge" class="ml-auto bg-green-600 px-2 py-0.5 rounded text-xs">0</span>
+                        </button>
+                        <button onclick="showSection('rules')" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-gray-800 flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            Rules
+                        </button>
+                    </nav>
 
-                    <!-- Column 3: Document data -->
-                    <div class="flex-1 bg-white rounded-xl border shadow-sm flex flex-col min-w-0">
-                        <div class="flex items-center justify-between p-3 border-b">
-                            <span class="text-sm font-bold text-gray-700" id="docDetailTitle">Document Data</span>
-                            <div id="docDetailActions" class="hidden flex gap-2">
-                                <button onclick="showEditDocumentModal()" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">✏️ Edit</button>
-                                <button onclick="deleteCurrentDocument()" class="text-xs border border-red-200 text-red-500 px-3 py-1 rounded-lg hover:bg-red-50">🗑 Delete</button>
+                    <div class="p-4 border-t border-gray-700">
+                        <div class="flex items-center gap-2 mb-2">
+                            <img id="sidebarUserPhoto" class="w-8 h-8 rounded-full" src="">
+                            <div class="flex-1 min-w-0">
+                                <p id="sidebarUserName" class="text-sm font-medium truncate"></p>
                             </div>
                         </div>
-                        <div id="docDetailBody" class="overflow-y-auto flex-1 p-4">
-                            <p class="text-xs text-gray-400 text-center py-8">Select a document to view its data</p>
+                        <button onclick="signOut()" class="w-full text-sm text-gray-400 hover:text-white">Sign Out</button>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="flex-1 overflow-auto">
+                    <!-- Overview Section -->
+                    <div id="overviewSection" class="hidden p-8">
+                        <h1 class="text-3xl font-bold mb-8">Overview</h1>
+                        <div class="grid grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                                <div class="text-gray-600 mb-2">Collections</div>
+                                <div class="text-3xl font-bold" id="collectionsCount">0</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                                <div class="text-gray-600 mb-2">Documents</div>
+                                <div class="text-3xl font-bold" id="documentsCount">0</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                                <div class="text-gray-600 mb-2">Phones</div>
+                                <div class="text-3xl font-bold" id="phonesCount">0</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                                <div class="text-gray-600 mb-2">Requests</div>
+                                <div class="text-3xl font-bold">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-lg shadow-sm border">
+                            <h2 class="text-xl font-bold mb-4">Quick Start</h2>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">1</div>
+                                    <div>
+                                        <div class="font-medium">Connect Your Phone</div>
+                                        <div class="text-sm text-gray-600">Install app on old Android phone</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">2</div>
+                                    <div>
+                                        <div class="font-medium">Create Collections</div>
+                                        <div class="text-sm text-gray-600">Organize your data like Firebase</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-blue-600">3</div>
+                                    <div>
+                                        <div class="font-medium">Build Your App</div>
+                                        <div class="text-sm text-gray-600">Use REST API or SDKs</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Database Section -->
+                    <div id="databaseSection" class="p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h1 class="text-3xl font-bold">Database</h1>
+                            <div class="flex gap-3">
+                                <button onclick="refreshDatabase()" class="px-4 py-2 border rounded-md hover:bg-gray-50 flex items-center gap-2">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Refresh
+                                </button>
+                                <button onclick="showAddCollectionModal()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">+ Add Collection</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-6">
+                            <!-- Collections Tree -->
+                            <div class="col-span-4 bg-white rounded-lg shadow-sm border">
+                                <div class="p-4 border-b">
+                                    <h2 class="font-bold">Collections</h2>
+                                </div>
+                                <div id="collectionsTree" class="p-4 space-y-1">
+                                    <div class="text-gray-500 text-sm">No collections yet. Click "+ Add Collection" to start.</div>
+                                </div>
+                            </div>
+
+                            <!-- Document View/Edit -->
+                            <div class="col-span-8 bg-white rounded-lg shadow-sm border">
+                                <div class="p-4 border-b flex items-center justify-between">
+                                    <h2 class="font-bold" id="documentTitle">Select a document</h2>
+                                    <div id="documentActions" class="hidden flex gap-2">
+                                        <button onclick="saveDocument()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Save</button>
+                                        <button onclick="deleteDocument()" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Delete</button>
+                                    </div>
+                                </div>
+                                <div id="documentContent" class="p-4">
+                                    <div class="text-center py-12 text-gray-500">
+                                        <svg class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <p>Select a collection or document to view</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phones Section -->
+                    <div id="phonesSection" class="hidden p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h1 class="text-3xl font-bold">Connected Phones</h1>
+                            <button onclick="showConnectPhoneModal()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">+ Connect Phone</button>
+                        </div>
+                        <div id="phonesList" class="grid gap-4"></div>
+                    </div>
+
+                    <!-- Rules Section -->
+                    <div id="rulesSection" class="hidden p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h1 class="text-3xl font-bold">Security Rules</h1>
+                            <button onclick="saveRules()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Publish Rules</button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="json-editor" id="rulesEditor"></div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- ===== APIS TAB ===== -->
-            <div id="view-apis" class="hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold">My APIs</h2>
-                    <button onclick="showCreateAPIModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">+ Create API</button>
-                </div>
-                <div id="apiList">
-                    <p class="text-gray-400 text-center py-8">No APIs yet.</p>
-                </div>
+    <!-- Modals -->
+    <!-- Add Collection Modal -->
+    <div id="addCollectionModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 class="text-2xl font-bold mb-4">Add Collection</h2>
+            <input type="text" id="collectionName" placeholder="Collection name (e.g., users)" class="w-full px-3 py-2 border rounded-md mb-4">
+            <div class="flex gap-3">
+                <button onclick="closeAddCollectionModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
+                <button onclick="createCollection()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ===== MODALS ===== -->
-
-<!-- Connect Phone Modal -->
-<div id="connectPhoneModal" class="modal">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Connect Your Phone</h2>
-            <button onclick="closeModal('connectPhoneModal')" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-        </div>
-        <div class="space-y-3">
-            <p class="text-sm text-gray-600">Run these commands in Termux on your phone:</p>
-            <div class="bg-gray-900 rounded-lg p-3 font-mono text-xs text-green-400">
-                <div class="flex justify-between mb-1"><span class="text-gray-400">Step 1: Install Node</span><button onclick="copyText('pkg update && pkg install nodejs -y')" class="bg-gray-700 text-white px-2 py-0.5 rounded text-xs">Copy</button></div>
-                pkg update && pkg install nodejs -y
+    <!-- Add Document Modal -->
+    <div id="addDocumentModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 class="text-2xl font-bold mb-4">Add Document</h2>
+            <input type="text" id="documentId" placeholder="Document ID (auto if empty)" class="w-full px-3 py-2 border rounded-md mb-4">
+            <textarea id="documentData" placeholder='{"field": "value"}' class="w-full px-3 py-2 border rounded-md mb-4" rows="6"></textarea>
+            <div class="flex gap-3">
+                <button onclick="closeAddDocumentModal()" class="flex-1 px-4 py-2 border rounded-md">Cancel</button>
+                <button onclick="createDocument()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
             </div>
-            <div class="bg-gray-900 rounded-lg p-3 font-mono text-xs text-green-400">
-                <div class="flex justify-between mb-1"><span class="text-gray-400">Step 2: Download server</span><button onclick="copyText('curl -o connect.js https://raw.githubusercontent.com/your-repo/main/connect.js')" class="bg-gray-700 text-white px-2 py-0.5 rounded text-xs">Copy</button></div>
-                <span id="dlCommand">wget [your-connect.js-url]</span>
-            </div>
-            <div class="bg-gray-900 rounded-lg p-3 font-mono text-xs text-green-400">
-                <div class="flex justify-between mb-1"><span class="text-gray-400">Step 3: Start server</span><button onclick="copyText('node connect.js ' + (window._currentUser ? window._currentUser.email : 'your@email.com'))" class="bg-gray-700 text-white px-2 py-0.5 rounded text-xs">Copy</button></div>
-                node connect.js <span id="emailHint"></span>
-            </div>
-        </div>
-        <p class="text-xs text-blue-700 bg-blue-50 rounded-lg p-3 mt-4">✅ Once running, your phone appears in the Connected Phones list. Then go to the <strong>Database</strong> tab to start managing data!</p>
-    </div>
-</div>
-
-<!-- Create Collection Modal -->
-<div id="createCollectionModal" class="modal">
-    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">New Collection</h2>
-            <button onclick="closeModal('createCollectionModal')" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-        </div>
-        <p class="text-sm text-gray-500 mb-4">A collection is like a folder or table that stores documents. Examples: <code class="bg-gray-100 px-1 rounded">users</code>, <code class="bg-gray-100 px-1 rounded">products</code>, <code class="bg-gray-100 px-1 rounded">orders</code></p>
-        <input type="text" id="collectionNameInput" placeholder="Collection name (e.g. users)" class="w-full border rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <div class="flex gap-2">
-            <button onclick="closeModal('createCollectionModal')" class="flex-1 border rounded-lg py-2 text-sm hover:bg-gray-50">Cancel</button>
-            <button onclick="createCollection()" class="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700">Create</button>
         </div>
     </div>
-</div>
 
-<!-- Add / Edit Document Modal -->
-<div id="addDocumentModal" class="modal">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold" id="docModalTitle">Add Document</h2>
-            <button onclick="closeModal('addDocumentModal')" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-        </div>
-        <div class="mb-3">
-            <label class="text-xs text-gray-500 block mb-1">Document ID (leave blank to auto-generate)</label>
-            <input type="text" id="docIdInput" placeholder="Auto-generated" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div class="mb-4">
-            <label class="text-xs text-gray-500 block mb-1">Document Data (JSON)</label>
-            <textarea id="docDataInput" rows="8" class="w-full border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder='{"name": "Alice", "age": 25, "active": true}'></textarea>
-            <p class="text-xs text-gray-400 mt-1" id="docJsonError"></p>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="closeModal('addDocumentModal')" class="flex-1 border rounded-lg py-2 text-sm hover:bg-gray-50">Cancel</button>
-            <button onclick="saveDocument()" id="saveDocBtn" class="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700">Save Document</button>
+    <!-- Connect Phone Modal -->
+    <div id="connectPhoneModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">Connect Your Phone</h2>
+                <button onclick="closeConnectPhoneModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm mb-4">
+                wget https://your-url.com/connect.js<br>
+                node connect.js <span id="modalUserEmail"></span>
+            </div>
+            <p class="text-sm text-gray-600">Run these commands in Termux on your Android phone</p>
         </div>
     </div>
-</div>
 
-<!-- Create API Modal -->
-<div id="createAPIModal" class="modal">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Create API</h2>
-            <button onclick="closeModal('createAPIModal')" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-        </div>
-        <div class="space-y-3">
-            <div>
-                <label class="text-xs text-gray-500 block mb-1">API Name</label>
-                <input type="text" id="apiName" placeholder="My Todo API" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="text-xs text-gray-500 block mb-1">Description</label>
-                <textarea id="apiDescription" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="What this API does"></textarea>
-            </div>
-            <div>
-                <label class="text-xs text-gray-500 block mb-1">Security</label>
-                <select id="apiSecurity" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="public">🔓 Public (No auth)</option>
-                    <option value="auth">🔒 Authenticated</option>
-                </select>
-            </div>
-        </div>
-        <div class="flex gap-2 mt-4">
-            <button onclick="closeModal('createAPIModal')" class="flex-1 border rounded-lg py-2 text-sm">Cancel</button>
-            <button onclick="createAPI()" class="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700">Create</button>
-        </div>
-    </div>
-</div>
+    <!-- Firebase SDK & App Logic -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+        import { getFirestore, collection, query, where, getDocs, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
-<!-- API Details Modal -->
-<div id="apiDetailsModal" class="modal">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height:90vh;">
-        <div class="flex items-center justify-between p-5 border-b shrink-0">
-            <div class="flex items-center gap-3">
-                <h2 class="text-xl font-bold" id="detailApiName"></h2>
-                <span id="detailApiBadge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
-            </div>
-            <button onclick="closeModal('apiDetailsModal')" class="text-gray-400 hover:text-gray-700 text-3xl">&times;</button>
-        </div>
-        <p class="px-5 pt-3 text-sm text-gray-500" id="detailApiDesc"></p>
-        <div id="detailApiBody" class="overflow-y-auto p-5 flex-1"></div>
-    </div>
-</div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
+            authDomain: "harshitproto.firebaseapp.com",
+            projectId: "harshitproto",
+            storageBucket: "harshitproto.firebasestorage.app",
+            messagingSenderId: "805078252087",
+            appId: "1:805078252087:web:1ca3704d0e672906445db2"
+        };
 
-<!-- ===== FIREBASE MODULE ===== -->
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-    import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    const app = initializeApp({
-        apiKey: "AIzaSyDiS42BJ1Ppc1z9UNrdyTKWtb8qmkKuQ_Y",
-        authDomain: "harshitproto.firebaseapp.com",
-        projectId: "harshitproto",
-        storageBucket: "harshitproto.firebasestorage.app",
-        messagingSenderId: "805078252087",
-        appId: "1:805078252087:web:1ca3704d0e672906445db2"
-    });
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    let phonesListener = null;
+        let currentUser = null;
+        let selectedPhone = null;
+        let databaseData = {};
+        let rulesEditor = null;
 
-    window.signInWithGoogle = async () => {
-        try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-        catch(e) { alert('Sign in failed: ' + e.message); }
-    };
-    window.signOut = async () => { try { await fbSignOut(auth); } catch(e){} };
-
-    window.createAPI = async function() {
-        const u = window._currentUser;
-        if (!u) return;
-        const name = document.getElementById('apiName').value.trim();
-        if (!name) { alert('Enter an API name'); return; }
-        try {
-            await addDoc(collection(db, 'apis'), {
-                name,
-                description: document.getElementById('apiDescription').value.trim(),
-                security: document.getElementById('apiSecurity').value,
-                userId: u.email,
-                username: u.email.split('@')[0],
-                createdAt: serverTimestamp()
-            });
-            closeModal('createAPIModal');
-            loadAPIs();
-        } catch(e) { alert('Failed: ' + e.message); }
-    };
-
-    window.deleteAPI = async function(id) {
-        if (!confirm('Delete this API?')) return;
-        try { await deleteDoc(doc(db, 'apis', id)); loadAPIs(); }
-        catch(e) { alert('Failed: ' + e.message); }
-    };
-
-    window._loadAPIs = async function() {
-        const u = window._currentUser;
-        if (!u) return;
-        const apiList = document.getElementById('apiList');
-        try {
-            const snap = await getDocs(query(collection(db, 'apis'), where('userId', '==', u.email)));
-            if (snap.empty) {
-                apiList.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">No APIs yet. Create your first API!</p>';
-                return;
+        window.signInWithGoogle = async function() {
+            try {
+                await signInWithPopup(auth, new GoogleAuthProvider());
+            } catch (error) {
+                alert('Sign in failed: ' + error.message);
             }
-            window._apiStore = {};
-            apiList.innerHTML = '';
-            snap.forEach(docSnap => {
-                const api = docSnap.data();
-                const id = docSnap.id;
-                window._apiStore[id] = api;
-                const slug = (api.name||'api').toLowerCase().replace(/\s+/g,'-');
-                const url = 'http://YOUR-PHONE-IP:8080/' + slug;
-                const isPublic = api.security === 'public';
-                const card = document.createElement('div');
-                card.className = 'border rounded-xl p-4 mb-3 bg-white hover:shadow-sm transition';
-                card.innerHTML =
-                    '<div class="flex items-start justify-between gap-3">' +
-                    '<div class="flex-1 min-w-0">' +
-                    '<div class="flex items-center gap-2 mb-1">' +
-                    '<span class="font-bold">' + escHtml(api.name) + '</span>' +
-                    '<span class="text-xs px-2 py-0.5 rounded-full ' + (isPublic ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700') + '">' + (isPublic ? '🔓 Public' : '🔒 Auth') + '</span>' +
-                    '</div>' +
-                    '<p class="text-xs text-gray-500 mb-2">' + escHtml(api.description||'No description') + '</p>' +
-                    '<div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-3 py-1.5 text-xs font-mono">' +
-                    '<span class="text-yellow-400 font-bold">GET/POST</span>' +
-                    '<span class="flex-1 truncate" id="urlbar-' + id + '">' + url + '</span>' +
-                    '<button onclick="copyText(document.getElementById(\'urlbar-' + id + '\').textContent)" class="bg-gray-700 hover:bg-gray-600 text-white px-2 py-0.5 rounded text-xs">Copy</button>' +
-                    '</div></div>' +
-                    '<div class="flex flex-col gap-1 shrink-0">' +
-                    '<button onclick="openAPIDetails(\'' + id + '\')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-blue-700">📖 How to Use</button>' +
-                    '<button onclick="deleteAPI(\'' + id + '\')" class="border border-red-200 text-red-500 text-xs px-3 py-1.5 rounded-lg hover:bg-red-50">🗑 Delete</button>' +
-                    '</div></div>';
-                apiList.appendChild(card);
-            });
-        } catch(e) { console.error(e); }
-    };
-    window.loadAPIs = window._loadAPIs;
+        };
 
-    function startListeningToPhones(user) {
-        if (phonesListener) phonesListener();
-        const q = query(collection(db, 'phones'), where('userId', '==', user.email));
-        phonesListener = onSnapshot(q, snap => {
-            const phoneList = document.getElementById('phoneList');
-            const phoneCount = document.getElementById('phoneCount');
-            const overallStatus = document.getElementById('overallStatus');
-            const selector = document.getElementById('phoneSelector');
+        window.signOut = async function() {
+            await firebaseSignOut(auth);
+        };
 
-            // save current selection
-            const prevVal = selector.value;
-
-            // rebuild selector
-            selector.innerHTML = '<option value="">— Select a phone —</option>';
-            window._phonesMap = {};
-
-            if (snap.empty) {
-                phoneList.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No phones connected</p>';
-                phoneCount.textContent = '0';
-                overallStatus.textContent = 'Offline';
-                overallStatus.className = 'text-2xl font-bold text-red-500';
-                return;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                showMainDashboard();
+                loadData();
+            } else {
+                document.getElementById('signInScreen').classList.remove('hidden');
+                document.getElementById('mainDashboard').classList.add('hidden');
             }
-
-            phoneCount.textContent = snap.size;
-            overallStatus.textContent = 'Online';
-            overallStatus.className = 'text-2xl font-bold text-green-500';
-            phoneList.innerHTML = '';
-
-            snap.forEach(d => {
-                const phone = d.data();
-                const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
-                const hasTunnel = !!(phone.publicUrl && phone.tunnelActive);
-                window._phonesMap[d.id] = phone;
-
-                // card
-                const card = document.createElement('div');
-                card.className = 'border rounded-xl p-4 mb-3 ' + (isOnline ? 'bg-green-50 border-green-200' : 'border-gray-200');
-                card.innerHTML =
-                    '<div class="flex items-start justify-between gap-3">' +
-                    '<div class="flex items-center gap-3">' +
-                    '<span class="text-2xl">📱</span>' +
-                    '<div>' +
-                    '<p class="font-semibold text-sm">' + escHtml(phone.deviceName||'Phone') + '</p>' +
-                    '<p class="text-xs text-gray-500">' + escHtml(phone.model||'') + '</p>' +
-                    '<p class="text-xs mt-1 ' + (isOnline ? 'text-green-600' : 'text-gray-400') + '">' + (isOnline ? '● Online' : '○ Offline') + '</p>' +
-                    '</div></div>' +
-                    '<div class="text-right min-w-0">' +
-                    (hasTunnel
-                        ? '<p class="text-xs text-gray-400 mb-1">🌍 Public URL</p>' +
-                          '<div class="flex items-center gap-1 justify-end">' +
-                          '<p class="text-xs font-mono text-blue-600 truncate max-w-[180px]">' + escHtml(phone.publicUrl) + '</p>' +
-                          '<button onclick="copyText(\'' + escHtml(phone.publicUrl) + '\')" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded shrink-0">Copy</button>' +
-                          '</div>'
-                        : '<p class="text-xs text-orange-500">⚠️ No tunnel active</p>' +
-                          '<p class="text-xs text-gray-400">Local: ' + (phone.ip||'?') + '</p>' +
-                          '<p class="text-xs text-gray-400 mt-1">Run: pkg install cloudflared</p>'
-                    ) +
-                    '</div></div>';
-                phoneList.appendChild(card);
-
-                // selector — prefer publicUrl, fallback to ip
-                const opt = document.createElement('option');
-                const connVal = JSON.stringify({ ip: phone.ip||'', publicUrl: phone.publicUrl||'', hasTunnel });
-                opt.value = connVal;
-                opt.textContent = (phone.deviceName||'Phone') + (hasTunnel ? ' 🌍 ' + phone.publicUrl : ' — ' + (phone.ip||'?'));
-                selector.appendChild(opt);
-            });
-
-            // restore selection
-            if (prevVal) selector.value = prevVal;
-            window.onPhoneSelected();
         });
-    }
 
-    onAuthStateChanged(auth, user => {
-        if (user) {
-            window._currentUser = user;
+        function showMainDashboard() {
             document.getElementById('signInScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
-            document.getElementById('userName').textContent = user.displayName||'User';
-            document.getElementById('userFirstName').textContent = (user.displayName||'User').split(' ')[0];
-            document.getElementById('userPhoto').src = user.photoURL||'';
-            document.getElementById('emailHint').textContent = user.email;
-            loadAPIs();
-            startListeningToPhones(user);
-        } else {
-            window._currentUser = null;
-            if (phonesListener) phonesListener();
-            document.getElementById('signInScreen').classList.remove('hidden');
-            document.getElementById('mainDashboard').classList.add('hidden');
+            document.getElementById('sidebarUserName').textContent = currentUser.displayName;
+            document.getElementById('sidebarUserPhoto').src = currentUser.photoURL;
+            document.getElementById('modalUserEmail').textContent = currentUser.email;
+            showSection('database');
         }
-    });
-</script>
 
-<!-- ===== UI + DATABASE LOGIC (regular script) ===== -->
-<script>
-// ---- Helpers ----
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function copyText(t) { navigator.clipboard.writeText(t).then(() => alert('✅ Copied!')); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-// ---- Tabs ----
-function showDashboard() {
-    document.getElementById('landingPage').classList.add('hidden');
-    document.getElementById('dashboardPage').classList.remove('hidden');
-}
-function switchMainTab(tab) {
-    ['overview','database','apis'].forEach(t => {
-        document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
-        const btn = document.getElementById('tab-' + t);
-        if (t === tab) {
-            btn.classList.add('border-blue-600','text-blue-600');
-            btn.classList.remove('border-transparent','text-gray-500');
-        } else {
-            btn.classList.remove('border-blue-600','text-blue-600');
-            btn.classList.add('border-transparent','text-gray-500');
+        async function loadData() {
+            // Load phones
+            const phonesQuery = query(collection(db, 'phones'), where('userId', '==', currentUser.email));
+            onSnapshot(phonesQuery, (snapshot) => {
+                const count = snapshot.size;
+                document.getElementById('phonesBadge').textContent = count;
+                document.getElementById('phonesCount').textContent = count;
+                
+                const phonesList = document.getElementById('phonesList');
+                if (snapshot.empty) {
+                    phonesList.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No phones connected</div>';
+                } else {
+                    phonesList.innerHTML = '';
+                    snapshot.forEach(docSnap => {
+                        const phone = docSnap.data();
+                        const isOnline = phone.lastSeen && (Date.now() - phone.lastSeen.toMillis()) < 60000;
+                        
+                        const el = document.createElement('div');
+                        el.className = 'bg-white p-4 rounded-lg shadow-sm border';
+                        el.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-bold">${phone.deviceName || 'Phone'}</h3>
+                                    <p class="text-sm text-gray-600">${phone.model || 'Unknown'}</p>
+                                    <span class="text-xs ${isOnline ? 'text-green-600' : 'text-gray-500'}">
+                                        ${isOnline ? '● Online' : '○ Offline'}
+                                    </span>
+                                </div>
+                                <button onclick="selectPhone('${phone.ip}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                                    View Data
+                                </button>
+                            </div>
+                        `;
+                        phonesList.appendChild(el);
+                    });
+                }
+            });
         }
-    });
-    if (tab === 'apis') loadAPIs();
-    if (tab === 'database') refreshDatabase();
-}
 
-// ---- Modals ----
-function showConnectPhoneModal() { document.getElementById('connectPhoneModal').classList.add('active'); }
-function showCreateCollectionModal() {
-    if (!window._selectedPhoneIp) { alert('Please select a connected phone first.'); return; }
-    document.getElementById('collectionNameInput').value = '';
-    document.getElementById('createCollectionModal').classList.add('active');
-}
-function showAddDocumentModal() {
-    if (!window._selectedCollection) return;
-    document.getElementById('docModalTitle').textContent = 'Add Document';
-    document.getElementById('docIdInput').value = '';
-    document.getElementById('docDataInput').value = '{\n  \n}';
-    document.getElementById('docJsonError').textContent = '';
-    document.getElementById('saveDocBtn').textContent = 'Save Document';
-    window._editingDocId = null;
-    document.getElementById('addDocumentModal').classList.add('active');
-    setTimeout(() => document.getElementById('docDataInput').focus(), 100);
-}
-function showEditDocumentModal() {
-    if (!window._selectedDocId || !window._selectedDocData) return;
-    document.getElementById('docModalTitle').textContent = 'Edit Document';
-    document.getElementById('docIdInput').value = window._selectedDocId;
-    document.getElementById('docIdInput').disabled = true;
-    document.getElementById('docDataInput').value = JSON.stringify(window._selectedDocData, null, 2);
-    document.getElementById('docJsonError').textContent = '';
-    document.getElementById('saveDocBtn').textContent = 'Update Document';
-    window._editingDocId = window._selectedDocId;
-    document.getElementById('addDocumentModal').classList.add('active');
-}
-function showCreateAPIModal() { document.getElementById('createAPIModal').classList.add('active'); }
-
-// ---- Phone / DB state ----
-window._selectedPhoneIp = null;
-window._selectedCollection = null;
-window._selectedDocId = null;
-window._selectedDocData = null;
-window._dbCache = {};   // { collName: { docId: {...data} } }
-
-function onPhoneSelected() {
-    const raw = document.getElementById('phoneSelector').value;
-    if (!raw) {
-        window._selectedPhoneIp = null;
-        window._selectedPhonePublicUrl = null;
-        document.getElementById('phoneStatusDot').textContent = 'No phone selected';
-        document.getElementById('collectionList').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Select a phone</p>';
-        document.getElementById('documentList').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Select a collection</p>';
-        document.getElementById('docDetailBody').innerHTML = '<p class="text-xs text-gray-400 text-center py-8">Select a document</p>';
-        document.getElementById('docDetailTitle').textContent = 'Document Data';
-        document.getElementById('docDetailActions').classList.add('hidden');
-        document.getElementById('addDocBtn').classList.add('hidden');
-        return;
-    }
-
-    let ip = '', publicUrl = '', hasTunnel = false;
-    try {
-        const parsed = JSON.parse(raw);
-        ip = parsed.ip || '';
-        publicUrl = parsed.publicUrl || '';
-        hasTunnel = parsed.hasTunnel || false;
-    } catch(e) {
-        ip = raw; // fallback for old format
-    }
-
-    window._selectedPhoneIp = ip;
-    window._selectedPhonePublicUrl = publicUrl;
-    window._selectedCollection = null;
-    window._selectedDocId = null;
-    window._dbCache = {};
-
-    if (hasTunnel && publicUrl) {
-        document.getElementById('phoneStatusDot').innerHTML =
-            '<span class="text-green-600 font-mono text-xs">🌍 ' + publicUrl + '</span>';
-    } else {
-        document.getElementById('phoneStatusDot').textContent = ip ? ('Local: ' + ip) : 'No phone selected';
-    }
-
-    document.getElementById('collectionList').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Loading...</p>';
-    document.getElementById('documentList').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Select a collection</p>';
-    document.getElementById('docDetailBody').innerHTML = '<p class="text-xs text-gray-400 text-center py-8">Select a document</p>';
-    document.getElementById('docDetailTitle').textContent = 'Document Data';
-    document.getElementById('docDetailActions').classList.add('hidden');
-    document.getElementById('addDocBtn').classList.add('hidden');
-    if (ip || publicUrl) fetchCollections();
-}
-
-function phoneUrl(path) {
-    // Prefer public Cloudflare URL, fallback to local IP
-    const base = window._selectedPhonePublicUrl || ('http://' + window._selectedPhoneIp + ':8080');
-    return base + path;
-}
-
-async function fetchJSON(url, options) {
-    const res = await fetch(url, options);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-}
-
-// ---- Collections ----
-async function fetchCollections() {
-    if (!window._selectedPhoneIp) return;
-    try {
-        const data = await fetchJSON(phoneUrl('/_db/collections'));
-        renderCollections(Array.isArray(data) ? data : (data.collections || []));
-    } catch(e) {
-        document.getElementById('collectionList').innerHTML = '<p class="text-xs text-red-400 text-center py-4">⚠️ Cannot reach phone.<br>Make sure connect.js is running.</p>';
-    }
-}
-
-function renderCollections(collections) {
-    const el = document.getElementById('collectionList');
-    document.getElementById('statCollections').textContent = collections.length;
-    if (!collections.length) {
-        el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No collections yet.<br>Click + to create one.</p>';
-        return;
-    }
-    el.innerHTML = '';
-    collections.forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'sidebar-item flex items-center justify-between group mb-1';
-        item.setAttribute('data-coll', name);
-        item.innerHTML =
-            '<div class="flex items-center gap-2 min-w-0">' +
-            '<span class="text-blue-500">📁</span>' +
-            '<span class="text-sm truncate">' + escHtml(name) + '</span>' +
-            '</div>' +
-            '<button onclick="deleteCollection(\'' + escHtml(name) + '\')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs px-1">✕</button>';
-        item.onclick = function(e) {
-            if (e.target.tagName === 'BUTTON') return;
-            selectCollection(name);
+        window.selectPhone = function(ip) {
+            selectedPhone = ip;
+            showSection('database');
+            loadDatabaseFromPhone();
         };
-        el.appendChild(item);
-    });
-}
 
-function selectCollection(name) {
-    window._selectedCollection = name;
-    window._selectedDocId = null;
-    document.querySelectorAll('.sidebar-item[data-coll]').forEach(el => {
-        el.classList.toggle('active', el.getAttribute('data-coll') === name);
-    });
-    document.getElementById('docListTitle').textContent = name;
-    document.getElementById('addDocBtn').classList.remove('hidden');
-    document.getElementById('docDetailTitle').textContent = 'Document Data';
-    document.getElementById('docDetailActions').classList.add('hidden');
-    document.getElementById('docDetailBody').innerHTML = '<p class="text-xs text-gray-400 text-center py-8">Select a document</p>';
-    fetchDocuments(name);
-}
+        async function loadDatabaseFromPhone() {
+            if (!selectedPhone) {
+                alert('Please select a phone first');
+                return;
+            }
 
-async function createCollection() {
-    const name = document.getElementById('collectionNameInput').value.trim().toLowerCase().replace(/\s+/g,'-');
-    if (!name) { alert('Enter a collection name'); return; }
-    if (!/^[a-z0-9_-]+$/.test(name)) { alert('Use only letters, numbers, - or _'); return; }
-    try {
-        await fetchJSON(phoneUrl('/_db/' + name), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({_init: true}) });
-        closeModal('createCollectionModal');
-        await fetchCollections();
-        selectCollection(name);
-    } catch(e) { alert('Failed to create collection: ' + e.message); }
-}
-
-async function deleteCollection(name) {
-    if (!confirm('Delete collection "' + name + '" and ALL its documents?')) return;
-    try {
-        await fetchJSON(phoneUrl('/_db/' + name + '?_deleteCollection=1'), { method:'DELETE' });
-        if (window._selectedCollection === name) {
-            window._selectedCollection = null;
-            document.getElementById('documentList').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Select a collection</p>';
-            document.getElementById('docDetailBody').innerHTML = '<p class="text-xs text-gray-400 text-center py-8">Select a document</p>';
-            document.getElementById('docDetailActions').classList.add('hidden');
-            document.getElementById('addDocBtn').classList.add('hidden');
+            try {
+                const response = await fetch(`http://${selectedPhone}:8080/_snapshot`);
+                databaseData = await response.json();
+                renderDatabase();
+            } catch (error) {
+                alert('Failed to load database: ' + error.message);
+            }
         }
-        fetchCollections();
-    } catch(e) { alert('Failed: ' + e.message); }
-}
 
-// ---- Documents ----
-async function fetchDocuments(collName) {
-    const el = document.getElementById('documentList');
-    el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Loading...</p>';
-    try {
-        const data = await fetchJSON(phoneUrl('/_db/' + collName));
-        const docs = data.documents || data || {};
-        window._dbCache[collName] = docs;
-        renderDocuments(collName, docs);
-    } catch(e) {
-        el.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Failed to load</p>';
-    }
-}
+        function renderDatabase() {
+            const tree = document.getElementById('collectionsTree');
+            tree.innerHTML = '';
 
-function renderDocuments(collName, docs) {
-    const el = document.getElementById('documentList');
-    const ids = Object.keys(docs).filter(k => k !== '_init');
-    let total = parseInt(document.getElementById('statDocuments').textContent || '0');
+            const collections = Object.keys(databaseData);
+            document.getElementById('collectionsCount').textContent = collections.length;
 
-    if (!ids.length) {
-        el.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No documents.<br>Click + to add one.</p>';
-        return;
-    }
+            let totalDocs = 0;
+            collections.forEach(collName => {
+                const docs = Object.keys(databaseData[collName] || {});
+                totalDocs += docs.length;
 
-    el.innerHTML = '';
-    ids.forEach(docId => {
-        const item = document.createElement('div');
-        item.className = 'sidebar-item flex items-center gap-2 mb-1 group';
-        item.setAttribute('data-doc', docId);
-        item.innerHTML =
-            '<span class="text-gray-400 text-xs">📄</span>' +
-            '<span class="text-xs truncate flex-1">' + escHtml(docId) + '</span>';
-        item.onclick = () => selectDocument(collName, docId, docs[docId]);
-        el.appendChild(item);
-    });
-    document.getElementById('statDocuments').textContent = ids.length;
-}
+                const collDiv = document.createElement('div');
+                collDiv.className = 'tree-item p-2 rounded';
+                collDiv.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <span class="font-medium">${collName}</span>
+                        <span class="text-xs text-gray-500">(${docs.length})</span>
+                    </div>
+                `;
+                collDiv.onclick = () => showCollection(collName);
+                tree.appendChild(collDiv);
 
-function selectDocument(collName, docId, data) {
-    window._selectedDocId = docId;
-    window._selectedDocData = data;
-    document.querySelectorAll('.sidebar-item[data-doc]').forEach(el => {
-        el.classList.toggle('active', el.getAttribute('data-doc') === docId);
-    });
-    document.getElementById('docDetailTitle').textContent = docId;
-    document.getElementById('docDetailActions').classList.remove('hidden');
-    renderDocumentData(data);
-}
+                const docsDiv = document.createElement('div');
+                docsDiv.className = 'tree-children hidden';
+                docs.forEach(docId => {
+                    const docDiv = document.createElement('div');
+                    docDiv.className = 'tree-item p-2 rounded text-sm';
+                    docDiv.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>${docId}</span>
+                        </div>
+                    `;
+                    docDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        showDocument(collName, docId);
+                    };
+                    docsDiv.appendChild(docDiv);
+                });
+                tree.appendChild(docsDiv);
 
-function renderDocumentData(data) {
-    const el = document.getElementById('docDetailBody');
-    if (!data || typeof data !== 'object') {
-        el.innerHTML = '<pre class="text-xs">' + escHtml(JSON.stringify(data, null, 2)) + '</pre>';
-        return;
-    }
-    let html = '<div class="space-y-1">';
-    Object.entries(data).forEach(([key, val]) => {
-        if (key === '_id') return;
-        const valType = typeof val;
-        let valHtml;
-        if (val === null) valHtml = '<span class="text-gray-400 text-xs italic">null</span>';
-        else if (valType === 'boolean') valHtml = '<span class="text-red-500 text-xs font-mono">' + val + '</span>';
-        else if (valType === 'number') valHtml = '<span class="text-blue-600 text-xs font-mono">' + val + '</span>';
-        else if (valType === 'string') valHtml = '<span class="text-green-700 text-xs font-mono">"' + escHtml(val) + '"</span>';
-        else valHtml = '<span class="text-gray-600 text-xs font-mono">' + escHtml(JSON.stringify(val)) + '</span>';
-        html += '<div class="flex items-start gap-2 py-1.5 border-b border-gray-50">' +
-            '<span class="text-purple-700 text-xs font-mono font-semibold w-32 shrink-0 truncate">' + escHtml(key) + '</span>' +
-            '<span class="text-gray-400 text-xs">:</span>' +
-            valHtml +
-            '</div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
-}
+                collDiv.onclick = () => {
+                    docsDiv.classList.toggle('hidden');
+                };
+            });
 
-async function saveDocument() {
-    const coll = window._selectedCollection;
-    if (!coll) return;
-    const rawId = document.getElementById('docIdInput').value.trim();
-    const docId = rawId || ('doc_' + Date.now());
-    const rawData = document.getElementById('docDataInput').value.trim();
-    let parsed;
-    try {
-        parsed = JSON.parse(rawData);
-    } catch(e) {
-        document.getElementById('docJsonError').textContent = '❌ Invalid JSON: ' + e.message;
-        return;
-    }
-    parsed._id = docId;
-    try {
-        const isEdit = !!window._editingDocId;
-        await fetchJSON(phoneUrl('/_db/' + coll + '/' + docId), {
-            method: isEdit ? 'PUT' : 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify(parsed)
-        });
-        closeModal('addDocumentModal');
-        document.getElementById('docIdInput').disabled = false;
-        await fetchDocuments(coll);
-        // re-select the doc
-        const updated = window._dbCache[coll] || {};
-        if (updated[docId]) selectDocument(coll, docId, updated[docId]);
-    } catch(e) {
-        document.getElementById('docJsonError').textContent = '❌ ' + e.message;
-    }
-}
+            document.getElementById('documentsCount').textContent = totalDocs;
+        }
 
-async function deleteCurrentDocument() {
-    const coll = window._selectedCollection;
-    const docId = window._selectedDocId;
-    if (!coll || !docId) return;
-    if (!confirm('Delete document "' + docId + '"?')) return;
-    try {
-        await fetchJSON(phoneUrl('/_db/' + coll + '/' + docId), { method: 'DELETE' });
-        window._selectedDocId = null;
-        window._selectedDocData = null;
-        document.getElementById('docDetailBody').innerHTML = '<p class="text-xs text-gray-400 text-center py-8">Select a document</p>';
-        document.getElementById('docDetailTitle').textContent = 'Document Data';
-        document.getElementById('docDetailActions').classList.add('hidden');
-        fetchDocuments(coll);
-    } catch(e) { alert('Failed: ' + e.message); }
-}
+        function showCollection(collName) {
+            const docs = databaseData[collName] || {};
+            const content = document.getElementById('documentContent');
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold">Collection: ${collName}</h3>
+                        <button onclick="showAddDocumentModal('${collName}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">+ Add Document</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${Object.keys(docs).map(docId => `
+                            <div class="p-3 border rounded hover:bg-gray-50 cursor-pointer" onclick="showDocument('${collName}', '${docId}')">
+                                <div class="font-medium">${docId}</div>
+                                <div class="text-xs text-gray-500">${Object.keys(docs[docId]).length} fields</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
-async function refreshDatabase() {
-    if (window._selectedPhoneIp) {
-        await fetchCollections();
-        if (window._selectedCollection) fetchDocuments(window._selectedCollection);
-    }
-}
+        function showDocument(collName, docId) {
+            const docData = databaseData[collName][docId];
+            document.getElementById('documentTitle').textContent = `${collName} / ${docId}`;
+            document.getElementById('documentActions').classList.remove('hidden');
+            
+            const content = document.getElementById('documentContent');
+            content.innerHTML = `
+                <textarea id="docDataEditor" class="w-full h-96 p-4 border rounded font-mono text-sm">${JSON.stringify(docData, null, 2)}</textarea>
+            `;
 
-// ---- API Details modal ----
-function openAPIDetails(apiId) {
-    const api = (window._apiStore||{})[apiId];
-    if (!api) { alert('Refresh the page and try again.'); return; }
-    const slug = (api.name||'api').toLowerCase().replace(/\s+/g,'-');
-    const phoneIp = window._selectedPhoneIp || 'YOUR-PHONE-IP';
-    const publicUrl = window._selectedPhonePublicUrl;
-    const baseUrl = publicUrl || ('http://' + phoneIp + ':8080');
-    const url = baseUrl + '/' + slug;
-    const isPublic = api.security === 'public';
+            window.currentDocument = { collection: collName, id: docId };
+        }
 
-    // Build GitHub Pages docs URL
-    const ghUser = window._ghUsername || 'YOUR-GITHUB-USERNAME';
-    const ghRepo = window._ghRepo || 'YOUR-REPO-NAME';
-    const docsUrl = 'https://' + ghUser + '.github.io/' + ghRepo + '/docs.html' +
-        '?name=' + encodeURIComponent(api.name) +
-        '&desc=' + encodeURIComponent(api.description||'') +
-        '&collection=' + encodeURIComponent(slug) +
-        '&security=' + (api.security||'public') +
-        (phoneIp !== 'YOUR-PHONE-IP' ? '&ip=' + encodeURIComponent(phoneIp) : '');
-
-    document.getElementById('detailApiName').textContent = api.name;
-    document.getElementById('detailApiDesc').textContent = api.description||'';
-    const badge = document.getElementById('detailApiBadge');
-    badge.textContent = isPublic ? '🔓 Public' : '🔒 Auth Required';
-    badge.className = 'px-3 py-1 rounded-full text-xs font-bold ' + (isPublic ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700');
-
-    const body = document.getElementById('detailApiBody');
-    body.innerHTML = '';
-
-    // GitHub Pages banner
-    const ghSec = document.createElement('div');
-    ghSec.className = 'mb-5 p-4 bg-gray-900 rounded-xl border border-gray-700';
-    ghSec.innerHTML =
-        '<div class="flex items-center gap-2 mb-3">' +
-        '<span class="text-lg">🌐</span>' +
-        '<span class="font-bold text-white text-sm">Public API Docs URL</span>' +
-        '<span class="text-xs text-gray-400 ml-auto">Share this with your users</span>' +
-        '</div>' +
-        '<div class="flex items-center gap-2 bg-black rounded-lg px-3 py-2 font-mono text-xs mb-3">' +
-        '<span class="text-blue-400 flex-1 break-all" id="gh-docs-url">' + docsUrl + '</span>' +
-        '<button id="gh-docs-copy" class="bg-blue-600 text-white px-2 py-1 rounded text-xs shrink-0">Copy</button>' +
-        '</div>' +
-        '<div class="flex gap-2 flex-wrap">' +
-        '<button id="gh-open-btn" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg">🔗 Open Docs Page</button>' +
-        '<button onclick="showGHSetup()" class="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg">⚙️ Setup GitHub Pages</button>' +
-        '</div>' +
-        '<div id="gh-setup-steps" class="hidden mt-3 text-xs text-gray-300 space-y-1 border-t border-gray-700 pt-3">' +
-        '<p class="font-bold text-white mb-2">One-time GitHub Pages setup:</p>' +
-        '<p>1. Create a GitHub repo (e.g. <code class="bg-gray-800 px-1 rounded">my-phone-api</code>)</p>' +
-        '<p>2. Upload <code class="bg-gray-800 px-1 rounded">proxy.html</code> and <code class="bg-gray-800 px-1 rounded">docs.html</code> to the repo</p>' +
-        '<p>3. Go to repo Settings → Pages → Deploy from main branch</p>' +
-        '<p>4. Enter your GitHub username and repo name below:</p>' +
-        '<div class="flex gap-2 mt-2 flex-wrap">' +
-        '<input id="gh-user-input" placeholder="github-username" class="bg-gray-800 text-white border border-gray-600 rounded px-2 py-1 text-xs w-36" oninput="updateGHUrl()">' +
-        '<input id="gh-repo-input" placeholder="repo-name" class="bg-gray-800 text-white border border-gray-600 rounded px-2 py-1 text-xs w-36" oninput="updateGHUrl()">' +
-        '</div>' +
-        '</div>';
-    body.appendChild(ghSec);
-
-    document.getElementById('gh-docs-copy').onclick = () => {
-        navigator.clipboard.writeText(document.getElementById('gh-docs-url').textContent).then(() => alert('✅ Docs URL copied!'));
-    };
-    document.getElementById('gh-open-btn').onclick = () => {
-        window.open(document.getElementById('gh-docs-url').textContent, '_blank');
-    };
-
-    // Store for updateGHUrl
-    window._currentApiSlug = slug;
-    window._currentApiName = api.name;
-    window._currentApiDesc = api.description||'';
-    window._currentApiSecurity = api.security||'public';
-
-    // URL section
-    const urlSec = document.createElement('div');
-    urlSec.className = 'mb-5';
-    urlSec.innerHTML =
-        '<h3 class="font-bold text-sm mb-2">🔗 Direct API Endpoint</h3>' +
-        '<div class="flex items-center gap-2 bg-gray-900 rounded-lg px-3 py-2 font-mono text-sm">' +
-        '<span class="text-green-400 flex-1 break-all" id="did-url">' + url + '</span>' +
-        '<button id="did-copy" class="bg-blue-600 text-white text-xs px-2 py-1 rounded shrink-0">Copy</button>' +
-        '</div>' +
-        '<p class="text-xs text-gray-400 mt-1">' + (phoneIp !== 'YOUR-PHONE-IP' ? '✅ Using phone IP: ' + phoneIp : '⚠️ Select a phone in the Database tab to see the real IP') + '</p>';
-    body.appendChild(urlSec);
-    document.getElementById('did-copy').onclick = () => { navigator.clipboard.writeText(document.getElementById('did-url').textContent).then(() => alert('✅ Copied!')); };
-
-    // Table
-    const tbl = document.createElement('div');
-    tbl.className = 'mb-5';
-    tbl.innerHTML =
-        '<h3 class="font-bold text-sm mb-2">📋 Endpoints</h3>' +
-        '<div class="border rounded-lg overflow-hidden text-xs">' +
-        '<table class="w-full"><thead class="bg-gray-50 text-gray-500 uppercase text-xs"><tr><th class="text-left px-3 py-2">Method</th><th class="text-left px-3 py-2">Path</th><th class="text-left px-3 py-2">Action</th></tr></thead><tbody class="divide-y">' +
-        mkRow('GET','/' + slug,'bg-blue-100 text-blue-700','Get all') +
-        mkRow('GET','/' + slug + '/:id','bg-blue-100 text-blue-700','Get one by ID') +
-        mkRow('POST','/' + slug,'bg-green-100 text-green-700','Add new') +
-        mkRow('PATCH','/' + slug + '/:id','bg-yellow-100 text-yellow-700','Update') +
-        mkRow('DELETE','/' + slug + '/:id','bg-red-100 text-red-700','Delete') +
-        '</tbody></table></div>';
-    body.appendChild(tbl);
-
-    // Code tabs
-    const codeSec = document.createElement('div');
-    codeSec.className = 'mb-5';
-    const fetchCode = '// GET all\nfetch("' + url + '").then(r=>r.json()).then(console.log);\n\n// POST\nfetch("' + url + '",{\n  method:"POST",\n  headers:{"Content-Type":"application/json"},\n  body:JSON.stringify({title:"Hello",value:42})\n}).then(r=>r.json()).then(console.log);\n\n// DELETE\nfetch("' + url + '/ID",{method:"DELETE"}).then(r=>r.json()).then(console.log);';
-    const curlCode = '# GET all\ncurl ' + url + '\n\n# POST\ncurl -X POST ' + url + ' \\\n  -H "Content-Type: application/json" \\\n  -d \'{"title":"Hello","value":42}\'\n\n# DELETE\ncurl -X DELETE ' + url + '/ID';
-    const pyCode = 'import requests\nBASE="' + url + '"\nprint(requests.get(BASE).json())\nprint(requests.post(BASE,json={"title":"Hello"}).json())\nrequests.delete(f"{BASE}/ID")';
-
-    codeSec.innerHTML =
-        '<h3 class="font-bold text-sm mb-2">💻 Code Examples</h3>' +
-        '<div class="flex gap-2 mb-2">' +
-        '<button data-tab="fetch" class="tab-btn active text-xs px-3 py-1 rounded-full">JS Fetch</button>' +
-        '<button data-tab="curl" class="tab-btn text-xs px-3 py-1 rounded-full">cURL</button>' +
-        '<button data-tab="py" class="tab-btn text-xs px-3 py-1 rounded-full">Python</button>' +
-        '</div>' +
-        mkPanel('fetch', fetchCode, false) +
-        mkPanel('curl', curlCode, true) +
-        mkPanel('py', pyCode, true);
-    body.appendChild(codeSec);
-
-    codeSec.querySelectorAll('[data-tab]').forEach(btn => {
-        btn.onclick = () => {
-            codeSec.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            codeSec.querySelectorAll('.cp').forEach(p => p.classList.add('hidden'));
-            codeSec.querySelector('#cp-' + btn.getAttribute('data-tab')).classList.remove('hidden');
+        window.saveDocument = async function() {
+            if (!window.currentDocument) return;
+            
+            try {
+                const newData = JSON.parse(document.getElementById('docDataEditor').value);
+                const {collection, id} = window.currentDocument;
+                
+                await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(newData)
+                });
+                
+                alert('Document saved!');
+                loadDatabaseFromPhone();
+            } catch (error) {
+                alert('Save failed: ' + error.message);
+            }
         };
-    });
-    codeSec.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.onclick = () => {
-            const pre = document.querySelector('#cp-' + btn.getAttribute('data-for') + ' pre');
-            if (pre) navigator.clipboard.writeText(pre.textContent).then(() => alert('✅ Copied!'));
+
+        window.deleteDocument = async function() {
+            if (!window.currentDocument) return;
+            if (!confirm('Delete this document?')) return;
+            
+            try {
+                const {collection, id} = window.currentDocument;
+                await fetch(`http://${selectedPhone}:8080/${collection}/${id}`, {method: 'DELETE'});
+                alert('Document deleted!');
+                loadDatabaseFromPhone();
+            } catch (error) {
+                alert('Delete failed: ' + error.message);
+            }
         };
-    });
 
-    document.getElementById('apiDetailsModal').classList.add('active');
-}
+        window.showAddCollectionModal = function() {
+            document.getElementById('addCollectionModal').classList.add('active');
+        };
 
-function showGHSetup() {
-    const el = document.getElementById('gh-setup-steps');
-    if (el) el.classList.toggle('hidden');
-}
+        window.closeAddCollectionModal = function() {
+            document.getElementById('addCollectionModal').classList.remove('active');
+        };
 
-function updateGHUrl() {
-    const user = document.getElementById('gh-user-input').value.trim() || 'YOUR-GITHUB-USERNAME';
-    const repo = document.getElementById('gh-repo-input').value.trim() || 'YOUR-REPO-NAME';
-    window._ghUsername = user;
-    window._ghRepo = repo;
-    localStorage.setItem('ghUsername', user);
-    localStorage.setItem('ghRepo', repo);
-    const slug = window._currentApiSlug || 'api';
-    const ip = window._selectedPhoneIp || '';
-    const newUrl = 'https://' + user + '.github.io/' + repo + '/docs.html' +
-        '?name=' + encodeURIComponent(window._currentApiName||'API') +
-        '&desc=' + encodeURIComponent(window._currentApiDesc||'') +
-        '&collection=' + encodeURIComponent(slug) +
-        '&security=' + (window._currentApiSecurity||'public') +
-        (ip ? '&ip=' + encodeURIComponent(ip) : '');
-    const el = document.getElementById('gh-docs-url');
-    if (el) el.textContent = newUrl;
-}
+        window.createCollection = async function() {
+            const name = document.getElementById('collectionName').value.trim();
+            if (!name) return alert('Enter collection name');
+            
+            try {
+                await fetch(`http://${selectedPhone}:8080/${name}/_init`, {method: 'POST'});
+                closeAddCollectionModal();
+                loadDatabaseFromPhone();
+            } catch (error) {
+                alert('Failed: ' + error.message);
+            }
+        };
 
-// Load saved GitHub config on startup
-window._ghUsername = localStorage.getItem('ghUsername') || 'YOUR-GITHUB-USERNAME';
-window._ghRepo     = localStorage.getItem('ghRepo')     || 'YOUR-REPO-NAME';
+        window.refreshDatabase = loadDatabaseFromPhone;
+        window.showConnectPhoneModal = function() {
+            document.getElementById('connectPhoneModal').classList.add('active');
+        };
+        window.closeConnectPhoneModal = function() {
+            document.getElementById('connectPhoneModal').classList.remove('active');
+        };
 
-function mkRow(method, path, cls, action) {
-    return '<tr class="hover:bg-gray-50"><td class="px-3 py-2"><span class="' + cls + ' px-1.5 py-0.5 rounded text-xs font-bold">' + method + '</span></td><td class="px-3 py-2 font-mono text-xs">' + path + '</td><td class="px-3 py-2 text-gray-600">' + action + '</td></tr>';
-}
-function mkPanel(id, code, hidden) {
-    return '<div id="cp-' + id + '" class="cp ' + (hidden?'hidden':'') + '">' +
-        '<div class="relative bg-gray-900 rounded-lg p-3 overflow-x-auto">' +
-        '<button class="copy-btn absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-0.5 rounded" data-for="' + id + '">Copy</button>' +
-        '<pre class="text-green-400 text-xs leading-relaxed">' + escHtml(code) + '</pre>' +
-        '</div></div>';
-}
-</script>
+        window.showSection = function(section) {
+            document.querySelectorAll('[id$="Section"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('bg-gray-800'));
+            event?.target.closest('.nav-item')?.classList.add('bg-gray-800');
+        };
+    </script>
+
+    <script>
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
