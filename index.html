@@ -369,22 +369,43 @@
                     apiList.innerHTML = '';
                     snapshot.forEach(docSnap => {
                         const api = docSnap.data();
+                        const apiId = docSnap.id;
+                        const username = api.username || currentUser.email.split('@')[0];
+                        const baseUrl = `http://<your-phone-ip>:8080`;
+                        const endpointPath = `/${api.name.toLowerCase().replace(/\s+/g, '-')}`;
+                        const fullUrl = `${baseUrl}${endpointPath}`;
+
                         const el = document.createElement('div');
-                        el.className = 'border rounded-lg p-4';
+                        el.className = 'border rounded-xl p-5 hover:shadow-md transition-shadow';
                         el.innerHTML = `
-                            <div class="flex justify-between">
-                                <div>
-                                    <h3 class="font-bold text-lg">${api.name}</h3>
-                                    <p class="text-sm text-gray-600">${api.description || 'No description'}</p>
-                                    <span class="inline-block mt-2 px-2 py-1 bg-${api.security === 'public' ? 'green' : 'blue'}-100 text-${api.security === 'public' ? 'green' : 'blue'}-800 rounded text-xs">
-                                        ${api.security === 'public' ? 'Public' : 'Authenticated'}
-                                    </span>
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-3 mb-1 flex-wrap">
+                                        <h3 class="font-bold text-lg">${api.name}</h3>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${api.security === 'public' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
+                                            ${api.security === 'public' ? '🔓 Public' : '🔒 Auth Required'}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mb-3">${api.description || 'No description'}</p>
+
+                                    <!-- Endpoint URL bar -->
+                                    <div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-3 py-2 text-sm font-mono overflow-x-auto">
+                                        <span class="text-yellow-400 text-xs font-bold shrink-0">GET/POST</span>
+                                        <span class="truncate" id="url-${apiId}">${fullUrl}</span>
+                                        <button onclick="copyUrl('${apiId}')" class="ml-auto shrink-0 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">
+                                            Copy
+                                        </button>
+                                    </div>
                                 </div>
-                                <button onclick="deleteAPI('${docSnap.id}')" class="text-red-600 hover:text-red-800">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
+                                <div class="flex flex-col gap-2 shrink-0">
+                                    <button onclick="showAPIDetails('${apiId}', ${JSON.stringify(JSON.stringify(api))})" 
+                                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded-lg font-medium">
+                                        📖 How to Use
+                                    </button>
+                                    <button onclick="deleteAPI('${apiId}')" class="border border-red-200 text-red-500 hover:bg-red-50 text-sm px-3 py-2 rounded-lg">
+                                        🗑 Delete
+                                    </button>
+                                </div>
                             </div>
                         `;
                         apiList.appendChild(el);
@@ -551,6 +572,239 @@
                 }
             }
         };
+
+        window.copyUrl = function(apiId) {
+            const urlEl = document.getElementById('url-' + apiId);
+            if (urlEl) {
+                navigator.clipboard.writeText(urlEl.textContent.trim()).then(() => {
+                    alert('✅ URL Copied!');
+                });
+            }
+        };
+
+        window.showAPIDetails = function(apiId, apiJsonStr) {
+            const api = JSON.parse(apiJsonStr);
+            const name = api.name;
+            const slug = name.toLowerCase().replace(/\s+/g, '-');
+            const phoneIp = '<your-phone-ip>';
+            const base = `http://${phoneIp}:8080`;
+            const url = `${base}/${slug}`;
+
+            document.getElementById('apiDetailName').textContent = name;
+            document.getElementById('apiDetailDesc').textContent = api.description || 'No description';
+            document.getElementById('apiDetailBadge').textContent = api.security === 'public' ? '🔓 Public' : '🔒 Auth Required';
+            document.getElementById('apiDetailBadge').className = `px-3 py-1 rounded-full text-xs font-bold ${api.security === 'public' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+
+            // Build the full docs HTML
+            document.getElementById('apiDetailBody').innerHTML = `
+                <!-- Base URL -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-800 mb-2">🔗 Your API Base URL</h3>
+                    <p class="text-sm text-gray-500 mb-2">Replace <code class="bg-gray-100 px-1 rounded">&lt;your-phone-ip&gt;</code> with your phone's IP shown in the Connected Phones section above.</p>
+                    <div class="flex items-center gap-2 bg-gray-900 text-green-400 rounded-lg px-4 py-3 font-mono text-sm">
+                        <span id="fullApiUrl" class="flex-1 break-all">${url}</span>
+                        <button onclick="navigator.clipboard.writeText('${url}').then(()=>alert('✅ Copied!'))" 
+                            class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700 shrink-0">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Endpoints Table -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-800 mb-3">📋 Available Endpoints</h3>
+                    <div class="border rounded-lg overflow-hidden text-sm">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+                                <tr>
+                                    <th class="text-left px-4 py-3">Method</th>
+                                    <th class="text-left px-4 py-3">Endpoint</th>
+                                    <th class="text-left px-4 py-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">GET</span></td>
+                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}</td>
+                                    <td class="px-4 py-3 text-gray-600">Get all records</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">GET</span></td>
+                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
+                                    <td class="px-4 py-3 text-gray-600">Get one record by ID</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">POST</span></td>
+                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}</td>
+                                    <td class="px-4 py-3 text-gray-600">Add a new record</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">PATCH</span></td>
+                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
+                                    <td class="px-4 py-3 text-gray-600">Update a record</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">DELETE</span></td>
+                                    <td class="px-4 py-3 font-mono text-xs text-gray-700">/${slug}/:id</td>
+                                    <td class="px-4 py-3 text-gray-600">Delete a record</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Code Examples -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-800 mb-3">💻 Code Examples</h3>
+
+                    <!-- Tabs -->
+                    <div class="flex gap-2 mb-3 flex-wrap">
+                        <button onclick="switchTab('fetch')" id="tab-fetch" class="tab-btn active-tab text-xs px-3 py-1.5 rounded-full font-medium">JS Fetch</button>
+                        <button onclick="switchTab('curl')" id="tab-curl" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">cURL</button>
+                        <button onclick="switchTab('python')" id="tab-python" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Python</button>
+                        <button onclick="switchTab('axios')" id="tab-axios" class="tab-btn text-xs px-3 py-1.5 rounded-full font-medium">Axios</button>
+                    </div>
+
+                    <!-- JS Fetch -->
+                    <div id="code-fetch" class="code-panel">
+                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+                            <button onclick="copyCode('code-fetch')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
+<pre class="text-green-400 text-xs leading-relaxed">// ✅ GET all records
+fetch('${url}')
+  .then(r => r.json())
+  .then(data => console.log(data));
+
+// ✅ POST new data
+fetch('${url}', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title: 'Hello', value: 42 })
+})
+  .then(r => r.json())
+  .then(data => console.log('Created:', data));
+
+// ✅ DELETE a record
+fetch('${url}/RECORD_ID', { method: 'DELETE' })
+  .then(r => r.json())
+  .then(data => console.log(data));</pre>
+                        </div>
+                    </div>
+
+                    <!-- cURL -->
+                    <div id="code-curl" class="code-panel hidden">
+                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+                            <button onclick="copyCode('code-curl')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
+<pre class="text-green-400 text-xs leading-relaxed"># GET all records
+curl ${url}
+
+# POST new data
+curl -X POST ${url} \\
+  -H "Content-Type: application/json" \\
+  -d '{"title":"Hello","value":42}'
+
+# DELETE a record
+curl -X DELETE ${url}/RECORD_ID</pre>
+                        </div>
+                    </div>
+
+                    <!-- Python -->
+                    <div id="code-python" class="code-panel hidden">
+                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+                            <button onclick="copyCode('code-python')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
+<pre class="text-green-400 text-xs leading-relaxed">import requests
+
+BASE = '${url}'
+
+# GET all records
+res = requests.get(BASE)
+print(res.json())
+
+# POST new data
+res = requests.post(BASE, json={'title': 'Hello', 'value': 42})
+print('Created:', res.json())
+
+# DELETE a record
+res = requests.delete(f'{BASE}/RECORD_ID')
+print(res.json())</pre>
+                        </div>
+                    </div>
+
+                    <!-- Axios -->
+                    <div id="code-axios" class="code-panel hidden">
+                        <div class="relative bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+                            <button onclick="copyCode('code-axios')" class="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">Copy</button>
+<pre class="text-green-400 text-xs leading-relaxed">// ✅ GET all records
+const { data } = await axios.get('${url}');
+console.log(data);
+
+// ✅ POST new data
+const { data: created } = await axios.post('${url}', {
+  title: 'Hello',
+  value: 42
+});
+console.log('Created:', created);
+
+// ✅ DELETE a record
+await axios.delete('${url}/RECORD_ID');</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How it works -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <h3 class="font-bold text-blue-800 mb-2">⚡ How It Works</h3>
+                    <ol class="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                        <li>Your phone runs a local HTTP server on port <strong>8080</strong></li>
+                        <li>Your API lives at the URL shown above</li>
+                        <li>Data is stored in a JSON file on your phone</li>
+                        <li>Send HTTP requests from any app, website, or script</li>
+                        <li>Both your phone and the client must be on the <strong>same WiFi network</strong></li>
+                    </ol>
+                </div>
+            `;
+
+            document.getElementById('apiDetailsModal').classList.add('active');
+        };
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.code-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active-tab');
+                b.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            document.getElementById('code-' + tab).classList.remove('hidden');
+            const btn = document.getElementById('tab-' + tab);
+            btn.classList.add('active-tab');
+            btn.classList.remove('bg-gray-100', 'text-gray-600');
+        };
+
+        window.copyCode = function(panelId) {
+            const pre = document.querySelector('#' + panelId + ' pre');
+            if (pre) {
+                navigator.clipboard.writeText(pre.textContent).then(() => alert('✅ Code copied!'));
+            }
+        };
     </script>
+    <!-- API Details Modal -->
+    <div id="apiDetailsModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col" style="max-height:90vh;">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b shrink-0">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h2 class="text-xl font-bold" id="apiDetailName">API Details</h2>
+                    <span id="apiDetailBadge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+                </div>
+                <button onclick="document.getElementById('apiDetailsModal').classList.remove('active')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <p class="px-6 pt-3 text-sm text-gray-500" id="apiDetailDesc"></p>
+            <!-- Scrollable body -->
+            <div id="apiDetailBody" class="overflow-y-auto p-6 flex-1"></div>
+        </div>
+    </div>
+
+    <style>
+        .active-tab { background: #2563eb !important; color: white !important; }
+        .tab-btn { background: #f3f4f6; color: #4b5563; transition: all 0.15s; }
+        .tab-btn:hover { background: #e5e7eb; }
+    </style>
+
 </body>
 </html>
